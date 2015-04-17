@@ -37,11 +37,16 @@ Menu, Tray, Icon, % FileExist(mIco:="hotstrings.ico") ? mIco : ""
 TrayTip, Custom Hotstrings, Reloaded!, 800, 1
 return
 HSEditor:
-run, % FileExist("Custom Hotstrings.exe") ? "Custom Hotstrings.exe" : "Custom Hotstrings.ahk"
+if (editorPath){
+	SplitPath, editorPath,, editorDir
+	Run, % editorPath, % editorDir
+} else
+	MsgBox 4144,, Couldn't find Custom Hotstrings editor...
 return
 Update:
-Run, update.exe,,UseErrorLevel
-if (ErrorLevel)
+if (FileExist("update.exe"))
+	Run, update.exe
+else
 	MsgBox 4144,, Unable to find updater file.`n`nTry visiting http://wsnhapps.com to re-download the application.
 return
 hkToggle:

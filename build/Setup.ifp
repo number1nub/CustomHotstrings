@@ -1,6 +1,6 @@
 [General]
 Program name = Custom Hotstring Manager
-Program version = 1.8.8.0
+Program version = 1.8.8.3
 Windows 2000 = 1
 Windows XP = 1
 Windows Server 2003 = 1
@@ -62,16 +62,10 @@ Allow = 1
 6 = update
 Language = 0
 RunProg = Custom Hotstrings.exe
-RunProgs = 0
+RunProgs = 1
 Execdlls = 1
 [Languages]
 [Files/Dirs]
-C:\SkyDrive\AHK\Custom Hotstrings\lib\
-n/a
-[Folder]
-C:\SkyDrive\AHK\Custom Hotstrings\res\
-n/a
-[Folder]
 C:\SkyDrive\AHK\Custom Hotstrings\build\Custom Hotstrings.exe
 848 KB
 exe
