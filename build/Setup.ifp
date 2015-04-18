@@ -1,6 +1,6 @@
 [General]
-Program name = Custom Hotstring Manager
-Program version = 1.8.8.3
+Program name = Custom Hotstrings Manager
+Program version = 1.8.8.5
 Windows 2000 = 1
 Windows XP = 1
 Windows Server 2003 = 1
@@ -11,12 +11,12 @@ Windows 8 = 1
 Company name = WSNHapps
 Website = http://wsnhapps.com/apps
 SFA = 0
-DFA = 1
+DFA = 0
 Comp = 1
 [Graphics]
 Wizard image = <main>
 Header image = <main>
-Install-icon image = C:\SkyDrive\AHK\Custom Hotstrings\res\hotstrings.ico
+Install-icon image = C:\OneDrive\AHK\Custom Hotstrings\hotstrings.ico
 Show Label = 1
 Windows style = 1
 XpStyle = 1
@@ -40,7 +40,7 @@ Program = <installpath>\Custom Hotstrings.exe
 Dll = 
 [Shortcuts]
 Allowtc = 0
-Shortcut path = <company>\<appname>
+Shortcut path = <company>\<appname>\
 [Serialoptions]
 Allows = 0
 Number = 20
@@ -51,12 +51,12 @@ Time = 2
 PlaySound = 0
 Allow = 0
 [Build]
-File = C:\SkyDrive\AHK\Custom Hotstrings\build\Setup.exe
+File = 
 [Updater]
 Allow = 1
 1 = <appname>
 2 = <appversion>
-3 = http://wsnhapps.com/apps/hotstrings
+3 = http://files.wsnhapps.com/hotstrings
 4 = 
 5 = 
 6 = update
@@ -66,8 +66,8 @@ RunProgs = 1
 Execdlls = 1
 [Languages]
 [Files/Dirs]
-C:\SkyDrive\AHK\Custom Hotstrings\build\Custom Hotstrings.exe
-848 KB
+C:\OneDrive\AHK\Custom Hotstrings\build\Custom Hotstrings.exe
+829 KB
 exe
 [Licence_Begin]
 |
