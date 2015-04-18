@@ -12,5 +12,5 @@ TrayMenu() {
 	if (A_IsCompiled)
 		Menu, Tray, Icon, %A_ScriptFullPath%, -159
 	else
-		Menu, Tray, Icon, % FileExist(mIco := (A_ScriptDir "\res\hotstrings.ico")) ? mIco : ""
+		Menu, Tray, Icon, % FileExist(mIco := (A_ScriptDir "\hotstrings.ico")) ? mIco : ""
 }

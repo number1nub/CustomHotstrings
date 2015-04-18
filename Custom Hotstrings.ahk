@@ -5,7 +5,7 @@
 Exe_File=%In_Dir%\build\Custom Hotstrings.exe
 Created_Date=1
 [VERSION]
-Resource_Files=%In_Dir%\res\hotstrings.ico
+Resource_Files=%In_Dir%\hotstrings.ico
 Set_Version_Info=1
 Company_Name=WSNHapps
 File_Description=Quickly create, edit and remove custom text replacement hotstrings.
@@ -16,7 +16,7 @@ Original_Filename=Custom Hotstrings.ahk
 Product_Name=Custom Hotstrings
 Product_Version=;auto_version
 [ICONS]
-Icon_1=%In_Dir%\res\hotstrings.ico
+Icon_1=%In_Dir%\hotstrings.ico
 
 * * * Compile_AHK SETTINGS END * * *
 */
