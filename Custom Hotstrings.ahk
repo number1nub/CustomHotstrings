@@ -1,25 +1,3 @@
-/*
-* * * Compile_AHK SETTINGS BEGIN * * *
-
-[AHK2EXE]
-Exe_File=%In_Dir%\build\Custom Hotstrings.exe
-Created_Date=1
-[VERSION]
-Resource_Files=%In_Dir%\hotstrings.ico
-Set_Version_Info=1
-Company_Name=WSNHapps
-File_Description=Quickly create, edit and remove custom text replacement hotstrings.
-File_Version=;auto_version
-Inc_File_Version=0
-Internal_Name=Custom Hotstrings.ahk
-Original_Filename=Custom Hotstrings.ahk
-Product_Name=Custom Hotstrings
-Product_Version=;auto_version
-[ICONS]
-Icon_1=%In_Dir%\hotstrings.ico
-
-* * * Compile_AHK SETTINGS END * * *
-*/
 #NoEnv
 #SingleInstance, Force
 DetectHiddenWindows, on
