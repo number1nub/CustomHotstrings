@@ -1,6 +1,6 @@
 [General]
 Program name = Custom Hotstrings Manager
-Program version = 1.8.8.5
+Program version = 1.8.8.6
 Windows 2000 = 1
 Windows XP = 1
 Windows Server 2003 = 1
@@ -51,7 +51,7 @@ Time = 2
 PlaySound = 0
 Allow = 0
 [Build]
-File = 
+File = C:\OneDrive\AHK\Custom Hotstrings\build\Setup.exe
 [Updater]
 Allow = 1
 1 = <appname>

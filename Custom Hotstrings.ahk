@@ -26,9 +26,20 @@ DetectHiddenWindows, on
 SetTitleMatchMode, 2
 SetWorkingDir, %A_ScriptDir%
 
-global Version, _HS_File, _File, _Strings, _Search, _Match, _Changed, _Title
+global _HS_File, _File, _Strings, _Search, _Match, _Changed, _Title, multi
+
+Loop, %0%
+	plist .= (plist ? " " : "") %A_Index%
+Params := Args(plist)
+
+if (Params.update) {
+	if (!CheckUpdate())
+		m("No update found.", "ico:i")
+	ExitApp
+}
 
 Setup()
+CheckUpdate()
 
 ;{===== Main GUI ====>>>
 
@@ -75,23 +86,23 @@ Gui, Add, Button, x+5 yp w85 h28 +default vBT_Find Disabled, &Find
 ;}
 
 ;{```` EXISTING HOTSTRINGS ````}
-Gui, Add, Groupbox, x10 y+20 h435 w850 hwndGB_Hotstrings Section, HotStrings:
+Gui, Add, Groupbox, x10 y+20 h400 w850 hwndGB_Hotstrings Section, HotStrings:
 Gui, Add, Button, xs+10 ys+30 w85 h30, &Edit
 Gui, Add, Button, x+5 yp w85 h30, &Delete
 Gui, Add, Button, x+540 yp-1 w110 h30 hwndBtn_EditAHK +Center, E&dit AHK File
 Gui, Font, s10
-Gui, Add, ListView, xs+10 y+5 w825 h365 vLV_1 gMainList hwndHSListID cBlack Sort ReadOnly Grid NoSortHdr, Trigger|Options|Replacement Text
+Gui, Add, ListView, xs+10 y+5 w825 h330 vLV_1 gMainList hwndHSListID cBlack Sort ReadOnly Grid NoSortHdr, Trigger|Options|Replacement Text
 Gui, Font, s11, Segoe UI
 ;}
 
 ;{```` SAVE/CLOSE BUTTONS ````}
-Gui, Add, Button, xm+350 y+15 w85 h30 +disabled vsaveButton hwndSaveButton, &Save
+Gui, Add, Button, xm+310 y+15 w85 h30 +disabled vsaveButton hwndSaveButton, &Save
 Gui, Add, Button, x+10 yp w85 h30 vcloseButton hwndCloseButton, &Close
 ;}
 
 ;{```` VERSION ````}
 Gui, Font, s10 italic
-Gui, Add, Text, xm+5 yp+15 hwndVersionTxt, version %Version%
+Gui, Add, Text, xm+5 yp+15 hwndVersionTxt, version ;auto_version
 ;}
 
 ;{```` FILL LIST VIEW ````}
@@ -157,56 +168,19 @@ GuiContextMenu:
 	return
 }
 
-ButtonAdd() {
-	GuiControlGet, ED_1
-	GuiControlGet, ED_2
-	GuiControlGet, ED_3
-	if (!RegExMatch(ED_1, "[^\s]+") Or !RegExMatch(ED_3, "[^\s]+"))
-		return
-	ED_1:=To_Trigger(ED_1), ED_3:=To_Raw(ED_3)
-	LV_Add("", ED_1, ED_2, ED_3)
-	_HS := Format(":{1}:{2}::{3}", ED_2, ED_1, ED_3)
-	_File .= _HS "`n"
-	_Changed := True
-	GuiControl, -Disabled, saveButton
-	ButtonClear()
-}
-
 ButtonReplace:
 {
 	Gui, Submit, NoHide
 	_Row := LV_GetNext()
 	if !(RegExMatch(ED_1, "[^\s]+") && RegExMatch(ED_3, "[^\s]+"))
 		return
-	ED_1:=To_Trigger(ED_1), ED_3:=To_Raw(ED_3)
+	ED_1:=To_Trigger(ED_1), ED_3:=!multi ? To_Raw(ED_3) : ED_3
 	LV_Modify(_Row, "", ED_1, ED_2, ED_3)
 	StringReplace, _File, _File, `n%_HS%`n, `n:%ED_2%:%ED_1%::%ED_3%`n
 	_Changed := True
 	GuiControl, -Disabled, saveButton
 	ButtonClear()
 	return
-}
-
-ButtonFind() {
-	GuiControlGet, ED_3
-	if (!RegExMatch(ED_3, "[^\s]+"))
-		return
-	if (ED_3 != _SEARCH)
-		_MATCH:=0, _SEARCH:=ED_3
-	_MATCH := Find_Next(ED_3, _MATCH)
-	if (_MATCH~="\d+")
-		LV_Modify(_MATCH, "Select Focus Vis")
-	return
-}
-
-ButtonClear() {
-	GuiControl, Enable, BT_Add
-	GuiControl, Disable, BT_Repl
-	GuiControl, Enable, BT_Find
-	GuiControl,, ED_1
-	GuiControl,, ED_2
-	GuiControl,, ED_3
-	ControlFocus, Edit1
 }
 
 ButtonDelete:
@@ -222,14 +196,12 @@ ButtonDelete:
 	
 	; Determine if the selected hotstring is a "Multi-Line" entry. if it
 	; is, loop through the file and retrieve all lines associated with it
-	if (RegExMatch(ED_3, "i)\s*?;\s*?<+?\s*?Multi-Line.*?>+"))
-	{
+	if (RegExMatch(ED_3, "i)\s*?;\s*?<+?\s*?Multi-Line.*?>+")) {
 		delText := SubStr(_File, InStr(_File, _HS) + StrLen(_HS))
 		loop, Parse, delText, `n
 		{
 			_HS .= A_LoopField "`n"
-			if (RegExMatch(A_LoopField, "i)^\s*?return.*?"))
-			{
+			if (RegExMatch(A_LoopField, "i)^\s*?return.*?")) {
 				_HS := RegExReplace(_HS, "i)\n$")
 				break
 			}
@@ -289,24 +261,29 @@ Delete::goto, buttonDelete
 #if
 
 
+#Include AddOption.ahk
 #Include Anchor.ahk
+#Include Args.ahk
+#Include ButtonAdd.ahk
+#Include ButtonClear.ahk
+#Include ButtonEdit.ahk
+#Include ButtonEditAHKFile.ahk
+#Include ButtonFind.ahk
+#Include ChangedSomething.ahk
+#Include CheckUpdate.ahk
 #Include ControlActive.ahk
 #Include CreateNewHSTxt.ahk
+#Include DeletePrevious.ahk
+#Include Edit 1.ahk
 #Include Find Next.ahk
 #Include From Raw.ahk
 #Include From Trigger.ahk
 #Include GuiClose.ahk
 #Include m.ahk
+#Include MainList.ahk
 #Include MenuAction.ahk
+#Include Setup.ahk
 #Include StatusChange.ahk
 #Include To Raw.ahk
 #Include To Trigger.ahk
 #Include TrayMenu.ahk
-#Include DeletePrevious.ahk
-#Include AddOption.ahk
-#Include Setup.ahk
-#Include ButtonEdit.ahk
-#Include ButtonEditAHKFile.ahk
-#Include ChangedSomething.ahk
-#Include Edit 1.ahk
-#Include MainList.ahk
