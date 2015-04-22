@@ -1,5 +1,5 @@
 CheckUpdate(_ReplaceCurrentScript:=1, _SuppressMsgBox:=0, _CallbackFunction:="", ByRef _Information:="") {
-	Static Update_URL  := "http://wsnhapps.com/"
+	Static Update_URL  := "http://files.wsnhapps.com/hotstrings/version.ini"
 		 , Retry_Count := 2
 		 , Script_Name
 		 , Version
