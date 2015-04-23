@@ -4,12 +4,11 @@ DetectHiddenWindows, on
 SetTitleMatchMode, 2
 SetWorkingDir, %A_ScriptDir%
 
-global _HS_File, _File, _Strings, _Search, _Match, _Changed, _Title, multi
+global settings, _HS_File, _File, _Strings, _Search, _Match, _Changed, _Title, multi
 
 Loop, %0%
 	plist .= (plist ? " " : "") %A_Index%
 Params := Args(plist)
-
 if (Params.update) {
 	if (!CheckUpdate())
 		m("No update found.", "ico:i")
@@ -22,18 +21,18 @@ CheckUpdate()
 ;{===== Main GUI ====>>>
 
 ;{```` GUI OPTIONS ````}
-GuiMinHeight := 510
-GuiMinWidth  := 690
-hsOptions    := "|?0: Don't trigger within words"
-			  . "|B0: Don't erase trigger string"
-			  . "|C: Trigger is case-sensitive"
-			  . "|C0: Match case of trigger in replacement"
-			  . "|*0: Require space, period or enter to trigger"
-			  . "|R0: Send expressions (raw off)"
-Gui, Font, s11 cWhite, Segoe UI
-Gui, Color, 8A4444
-Gui, Margin, 10, 10
-Gui, % "+HwndWinHwnd +Resize +ToolWindow +AlwaysOnTop +MinSize" GuiMinWidth "x" GuiMinHeight
+color := settings.ea("//Style/Color")
+font := settings.ea("//Style/Font")
+Loop, % settings.sn("//HSOptions/Option").length
+	hsOptions .= "|" settings.ssn("//HSOptions/Option[" (A_Index) "]").text
+gui := settings.ssn("//Guis/Gui[@ID='1']")
+Loop, % sn(gui, "//Options/Option").length
+	guiOptions .= " +" ssn(gui, "//Options/Option[" A_Index "]").text
+
+Gui, Font, % "s" font.Size " c" font.Color, % font.Font
+Gui, Color, % color.Background, % color.Control
+Gui, Margin, % ssn(gui, "//Margin").text, % ssn(gui, "//Margin").text
+Gui, % Trim(guiOptions)
 ;}
 
 ;{```` TRIGGER ````}
@@ -265,3 +264,6 @@ Delete::goto, buttonDelete
 #Include To Raw.ahk
 #Include To Trigger.ahk
 #Include TrayMenu.ahk
+#Include class Xml.ahk
+#Include ssn.ahk
+#Include sn.ahk

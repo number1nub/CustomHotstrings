@@ -30,9 +30,7 @@ Menu, Tray, Add, Reload
 Menu, Tray, Add, Exit
 Menu, Tray, Tip, My Custom Hotstrings`n`nrunning...
 if (!FileExist("hotstrings.ico"))
-	try URLDownloadToFile, http://files.wsnhapps.com/hotstrings/hotstrings.ico, hotstrings.ico
-	catch
-		FileDelete, hotstrings.ico
+	URLDownloadToFile, http://files.wsnhapps.com/hotstrings/hotstrings.ico, hotstrings.ico
 Menu, Tray, Icon, % FileExist(mIco:="hotstrings.ico") ? mIco : ""
 TrayTip, Custom Hotstrings, Reloaded!, 800, 1
 return
