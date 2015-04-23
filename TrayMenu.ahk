@@ -1,7 +1,9 @@
 TrayMenu() {
 	Menu, DefaultAHK, Standard
 	Menu, Tray, NoStandard
-	Menu, Tray, Add, Open Custom Hotstrings Folder, MenuAction	
+	Menu, Tray, Add, Remember Window Position, MenuAction
+	Menu, Tray, % settings.ea("//Options").RememberPosition ? "Check" : "UnCheck", Remember Window Position
+	Menu, Tray, Add, Open Custom Hotstrings Folder, MenuAction
 	if (!A_IsCompiled) {
 		Menu, Tray, Add
 		Menu, Tray, Add, Default AHK Menu, :DefaultAHK

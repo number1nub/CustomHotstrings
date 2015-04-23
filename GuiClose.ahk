@@ -2,20 +2,14 @@ GuiClose() {
 	GuiEscape:
 	ButtonQuit:
 	ButtonClose:
-	Gui, +OwnDialogs
-	if (_Changed) {
-		MsgBox, 4132, %_Title%,
-	   (LTrim
-		  You've changed your hotstrings!
-
-		  Do you want to save the changes?
-	   )
-		ifMsgBox, Yes
+	if (_Changed)
+		if (m("You've changed your hotstrings!`n", "Save Changes??", "btn:yn", "ico:!") = "Yes")
 			Gosub, ButtonSave
-	}
-	if (A_GuiControl = "&Quit") {
-		Gui, Destroy
-		ExitApp
-	}
-	exitapp
+	pos := settings.ssn("//Guis/Gui[@ID='" A_Gui "']/Position")
+	WinGetPos, wx, wy, ww, wh
+	for c, v in {x:wx, y:wy, w:ww, h:wh}
+		pos.setAttribute(c, v), posStr.=" " c v
+	pos.text := Trim(posStr)
+	settings.save(1)
+	Exitapp
 }
