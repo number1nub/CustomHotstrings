@@ -5,7 +5,7 @@ CheckUpdate(_ReplaceCurrentScript:=1, _SuppressMsgBox:=0, _CallbackFunction:="",
 		 , Script_Name
 		 , Version
 	
-	Version = ;auto_version
+	;auto_version
 	if (!Version)
 		return
 	if (!Script_Name) {

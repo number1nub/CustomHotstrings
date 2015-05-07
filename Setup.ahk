@@ -1,5 +1,4 @@
 Setup(dir="") {
-	Version   = ;auto_version
 	_HSDir   := dir ? dir : A_AppData "\WSNHapps\Custom Hotstrings"
 	_HS_File :=_HSDir "\hsTxt.ahk"
 	regPath  := "Software\WSNHapps\CustomHotstrings"

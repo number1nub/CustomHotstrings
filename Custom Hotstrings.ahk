@@ -6,6 +6,7 @@ SetWorkingDir, %A_ScriptDir%
 
 global settings, _HS_File, _File, _Strings, _Search, _Match, _Changed, _Title, multi
 
+
 Loop, %0%
 	plist .= (plist ? " " : "") %A_Index%
 Params := Args(plist)
@@ -82,7 +83,7 @@ Gui, Add, Button, x+10 yp w85 h30 vcloseButton hwndCloseButton, &Close
 
 ;{```` VERSION ````}
 Gui, Font, s10 italic
-Gui, Add, Text, xm+5 yp+15 hwndVersionTxt, version ;auto_version
+Gui, Add, Text, xm+5 yp+15 hwndVersionTxt, % StrReplace("v;auto_version", "Version=")
 ;}
 
 ;{```` FILL LIST VIEW ````}
