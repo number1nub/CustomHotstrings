@@ -1,4 +1,4 @@
-﻿Args(paramList) {
+Args(paramList) {
 	count:=0, options:={}	
 	paramList := RegExReplace(paramList, "(?:([^\s])-|(\s+)-(\s+))", "$1$2<dash>$3")
 	paramList := RegExReplace(paramList, "(?:([^\s])/|(\s+)/(\s+))", "$1$2<slash>$3")

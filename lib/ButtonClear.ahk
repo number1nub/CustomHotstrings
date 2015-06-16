@@ -1,4 +1,4 @@
-﻿ButtonClear() {
+ButtonClear() {
 	GuiControl, Enable, BT_Add
 	GuiControl, Disable, BT_Repl
 	GuiControl, Enable, BT_Find

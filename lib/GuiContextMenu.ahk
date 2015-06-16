@@ -1,4 +1,4 @@
-﻿GuiContextMenu() {
+GuiContextMenu() {
 	if (A_GuiControl != "LV_1")
 		return
 	Menu, rClick, Add, Edit, buttonEdit

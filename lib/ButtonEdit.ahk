@@ -1,4 +1,4 @@
-﻿ButtonEdit:
+ButtonEdit:
 {
 	_Row := LV_GetNext()
 	if (!_Row)

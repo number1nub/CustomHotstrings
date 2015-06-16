@@ -1,4 +1,4 @@
-﻿MenuAction() {
+MenuAction() {
 	if (A_ThisMenuItem = "Run hsTxt.ahk") {
 		SendMessage, 0x111, 65303,,, hsTxt.ahk - AutoHotkey
 		if (ErrorLevel)

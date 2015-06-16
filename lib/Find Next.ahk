@@ -1,4 +1,4 @@
-﻿Find_Next(str, lastRow, searchCol=3) {
+Find_Next(str, lastRow, searchCol=3) {
 	Global
 	Local Options:="", Text:="", End:=LV_GetCount(), Row:=lastRow+1
 	if (Row > End)

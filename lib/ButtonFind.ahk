@@ -1,4 +1,4 @@
-﻿ButtonFind() {
+ButtonFind() {
 	GuiControlGet, ED_3
 	if (!RegExMatch(ED_3, "[^\s]+"))
 		return

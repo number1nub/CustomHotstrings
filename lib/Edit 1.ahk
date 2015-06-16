@@ -1,4 +1,4 @@
-﻿Edit_1() {
+Edit_1() {
 	GuiControlGet, ED_1
 	if (!RegExMatch(ED_1, "[^\s]+"))
 		return	

@@ -4,8 +4,8 @@ DetectHiddenWindows, on
 SetTitleMatchMode, 2
 SetWorkingDir, %A_ScriptDir%
 
-global settings, _HS_File, _File, _Strings, _Search, _Match, _Changed, _Title, multi
 
+global settings, _HS_File, _File, _Strings, _Search, _Match, _Changed, _Title, multi
 
 Loop, %0%
 	plist .= (plist ? " " : "") %A_Index%
@@ -23,12 +23,17 @@ CheckUpdate()
 ;{===== Main GUI ====>>>
 
 ;{```` GUI OPTIONS ````}
-color:=settings.ea("//Style/Color"), font:=settings.ea("//Style/Font"), hsOpts:=settings.sn("//HSOptions/Option"), gui:=settings.ssn("//Guis/Gui[@ID='1']"), guiOpts:=sn(gui, "//Options/Option")
+color   := settings.ea("//Style/Color"), font:=settings.ea("//Style/Font")
+hsOpts  := settings.sn("//HSOptions/Option"), gui:=settings.ssn("//Guis/Gui[@ID='1']")
+guiOpts := sn(gui, "//Options/Option")
 
 while opt:=hsOpts.Item(A_Index-1)
 	hsOptions .= "|" opt.text
 while opt:=guiOpts.Item(A_Index-1)
 	guiOptions .= " +" opt.text
+
+;#[TODO: Add a file menu]
+
 Gui, Font, % "s" font.Size " c" font.Color, % font.Font
 Gui, Color, % color.Background, % color.Control
 Gui, Margin, % ssn(gui, "//Margin/@x").text, % ssn(gui, "//Margin/@y").text
@@ -231,33 +236,33 @@ Delete::goto, buttonDelete
 #if
 
 
-#Include AddOption.ahk
-#Include Anchor.ahk
-#Include Args.ahk
-#Include ButtonAdd.ahk
-#Include ButtonClear.ahk
-#Include ButtonEdit.ahk
-#Include ButtonEditAHKFile.ahk
-#Include ButtonFind.ahk
-#Include ChangedSomething.ahk
-#Include CheckUpdate.ahk
-#Include ControlActive.ahk
-#Include CreateNewHSTxt.ahk
-#Include DeletePrevious.ahk
-#Include Edit 1.ahk
-#Include Find Next.ahk
-#Include From Raw.ahk
-#Include From Trigger.ahk
-#Include GuiClose.ahk
-#Include m.ahk
-#Include MainList.ahk
-#Include MenuAction.ahk
-#Include Setup.ahk
-#Include StatusChange.ahk
-#Include To Raw.ahk
-#Include To Trigger.ahk
-#Include TrayMenu.ahk
-#Include class Xml.ahk
-#Include ssn.ahk
-#Include sn.ahk
-#Include GuiContextMenu.ahk
+#Include <AddOption>
+#Include <Anchor>
+#Include <Args>
+#Include <ButtonAdd>
+#Include <ButtonClear>
+#Include <ButtonEdit>
+#Include <ButtonEditAHKFile>
+#Include <ButtonFind>
+#Include <ChangedSomething>
+#Include <CheckUpdate>
+#Include <class Xml>
+#Include <ControlActive>
+#Include <CreateNewHSTxt>
+#Include <DeletePrevious>
+#Include <Edit 1>
+#Include <Find Next>
+#Include <From Raw>
+#Include <From Trigger>
+#Include <GuiClose>
+#Include <GuiContextMenu>
+#Include <m>
+#Include <MainList>
+#Include <MenuAction>
+#Include <Setup>
+#Include <sn>
+#Include <ssn>
+#Include <StatusChange>
+#Include <To Raw>
+#Include <To Trigger>
+#Include <TrayMenu>

@@ -1,4 +1,4 @@
-﻿GuiClose() {
+GuiClose() {
 	GuiEscape:
 	ButtonQuit:
 	ButtonClose:

@@ -1,4 +1,4 @@
-﻿AddOption() {
+AddOption() {
 	AddOption:
 	Gui, Submit, NoHide
 	GuiControlGet, exOpts,, ED_2

@@ -1,4 +1,4 @@
-﻿CreateNewHSTxt() {
+CreateNewHSTxt() {
 	try {
 		SplitPath, _HS_File,, hsDir
 		if (!FileExist(hsDir))

@@ -1,4 +1,4 @@
-﻿ButtonAdd() {
+ButtonAdd() {
 	GuiControlGet, ED_1
 	GuiControlGet, ED_2
 	GuiControlGet, ED_3

@@ -1,4 +1,4 @@
-﻿TrayMenu() {
+TrayMenu() {
 	Menu, DefaultAHK, Standard
 	Menu, Tray, NoStandard
 	Menu, Tray, Add, Remember Window Position, MenuAction

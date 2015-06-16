@@ -1,4 +1,4 @@
-﻿DeletePrevious() {
+DeletePrevious() {
 	cbBU:=Clipboard, Clipboard:=""
 	SendInput, {Blind}+{Home}
 	SendInput, {Blind}^c
