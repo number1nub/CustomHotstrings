@@ -1,6 +1,6 @@
-Setup(dir="") {
+Setup(dir="") {	
 	_HSDir   := dir ? dir : A_AppData "\WSNHapps\Custom Hotstrings"
-	_HS_File :=_HSDir "\hsTxt.ahk"
+	_HS_File := _HSDir "\hsTxt.ahk"
 	regPath  := "Software\WSNHapps\CustomHotstrings"
 	_Strings := "`n"
 	_Title   := "Custom Hotstring Manager"
