@@ -18,6 +18,6 @@ CreateNewHSTxt() {
 	}
 	catch e {
 		m("There was an issue while trying to create the new hotstrings file.", "Aborting...","ico:!")
-		ExitAppo
+		ExitApp
 	}
 }
