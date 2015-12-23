@@ -1,4 +1,4 @@
-Setup(dir="") {	
+Setup(dir:="") {	
 	_HSDir   := dir ? dir : A_AppData "\WSNHapps\Custom Hotstrings"
 	_HS_File := _HSDir "\hsTxt.ahk"
 	regPath  := "Software\WSNHapps\CustomHotstrings"
@@ -7,7 +7,7 @@ Setup(dir="") {
 	settings := new Xml("settings", _HSDir "\settings.xml")
 	
 	if (!settings.fileExists) {
-		settings.add2("Options", {RememberPosition:1},"")
+		settings.add2("Options", {RememberPosition:0},"")
 		style := settings.add2("Style")
 		settings.under(style, "Color", {Background:"8A4444", Control:"White"})
 		settings.under(style, "Font", {Font:"Segoe UI", Color:"White", Size:11})

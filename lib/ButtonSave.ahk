@@ -16,8 +16,7 @@ ButtonSave:
 	FileMove, %_HS_File%_New, %_HS_File%, 1
 	if (ErrorLevel)
 		MsgBox, 4112, %_Title%, Couldn't overwrite %_HS_File%
-	_Changed := False
-	
+	_Changed := False	
 	sleep, 100
 	SendMessage, 0x111, 65303,,, hsTxt.ahk - AutoHotkey
 	if (ErrorLevel)

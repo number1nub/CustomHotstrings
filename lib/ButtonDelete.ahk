@@ -13,7 +13,7 @@ ButtonDelete:
 	; is, loop through the file and retrieve all lines associated with it
 	if (RegExMatch(ED_3, "i)\s*?;\s*?<+?\s*?Multi-Line.*?>+")) {
 		delText := SubStr(_File, InStr(_File, _HS) + StrLen(_HS))
-		loop, Parse, delText, `n
+		loop, Parse, delText, `n, `r
 		{
 			_HS .= A_LoopField "`n"
 			if (RegExMatch(A_LoopField, "i)^\s*?return.*?")) {
