@@ -1,3 +1,5 @@
+1.9.2.1
+- Disabled GUI AlwaysOnTop to allow system dialogs to display correctly
 1.9.2.0
 - Added a menu bar to the GUI allowing quick access to settings & other features
 - Added option to change GUI color from menu
