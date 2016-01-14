@@ -38,7 +38,53 @@ AddOption() {
 	ControlSend, Edit2, {Blind}^{End}
 	return
 }
-
+Anchor(i, a:="", r:=false) {
+	static c,cs:=12,cx:=255,cl:=0,g,gs:=8,gl:=0,gpi,gw,gh,z:=0,k:=0xffff,ptr
+	if z = 0
+		VarSetCapacity(g,gs*99,0),VarSetCapacity(c,cs*cx,0),ptr:=A_PtrSize?"Ptr":"UInt",z:=true
+	if !WinExist("ahk_id" . i) {
+		GuiControlGet t, Hwnd, %i%
+		if ErrorLevel = 0
+			i := t
+		else ControlGet i, Hwnd,, %i%
+	}
+	VarSetCapacity(gi, 68, 0), DllCall("GetWindowInfo", "UInt", gp := DllCall("GetParent", "UInt", i), ptr, &gi)
+		, giw := NumGet(gi, 28, "Int") - NumGet(gi, 20, "Int"), gih := NumGet(gi, 32, "Int") - NumGet(gi, 24, "Int")
+	if (gp != gpi) {
+		gpi := gp
+		loop %gl%
+			if NumGet(g, cb := gs*(A_Index - 1), "UInt") == gp {
+				gw := NumGet(g, cb+4, "Short"), gh := NumGet(g, cb+6, "Short"), gf := 1
+				break
+			}
+		if !gf
+			NumPut(gp, g, gl, "UInt"), NumPut(gw := giw, g, gl+4, "Short"), NumPut(gh := gih, g, gl+6, "Short"), gl += gs
+	}
+	ControlGetPos dx, dy, dw, dh,, ahk_id %i%
+	loop %cl%
+		if NumGet(c, cb := cs*(A_Index - 1), "UInt") == i {
+			if (a = "") {
+				cf := 1
+				break
+			}
+			giw-=gw, gih-=gh, as:=1, dx:=NumGet(c, cb+4, "Short"), dy:=NumGet(c, cb+6, "Short"), cw:=dw, dw:=NumGet(c, cb+8, "Short"), ch:=dh, dh:=NumGet(c, cb+10, "Short")
+			loop Parse, a, xywh
+				if A_Index > 1
+					av:=SubStr(a,as,1), as+=1+StrLen(A_LoopField), d%av%+=(InStr("yh",av)?gih:giw)*(A_LoopField+0?A_LoopField:1)
+			DllCall("SetWindowPos", "UInt", i, "UInt", 0, "Int", dx, "Int", dy, "Int", InStr(a, "w") ? dw : cw, "Int", InStr(a, "h") ? dh : ch, "Int", 4)
+			if r != 0
+				DllCall("RedrawWindow", "UInt", i, "UInt", 0, "UInt", 0, "UInt", 0x0101)
+			return
+		}
+	if cf != 1
+		cb := cl, cl += cs
+	bx := NumGet(gi, 48, "UInt"), by := NumGet(gi, 16, "Int") - NumGet(gi, 8, "Int") - gih - NumGet(gi, 52, "UInt")
+	if cf = 1
+		dw -= giw - gw, dh -= gih - gh
+	NumPut(i, c, cb, "UInt"), NumPut(dx - bx, c, cb+4, "Short"), NumPut(dy - by, c, cb+6, "Short")
+		, NumPut(dw, c, cb+8, "Short"), NumPut(dh, c, cb+10, "Short")
+	return true
+}
 Args(paramList) {
 	count:=0, options:={}	
 	paramList := RegExReplace(paramList, "(?:([^\s])-|(\s+)-(\s+))", "$1$2<dash>$3")
@@ -697,16 +743,18 @@ DeletePrevious() {
 FileMenu(gui:="") {
 	;FILE MENU
 	Menu, fMenu, Add, Open Custom Hotstrings &Folder, MenuAction
-	Menu, fMenu, Icon, Open Custom Hotstrings &Folder, shell32.dll, 46
+	Menu, fMenu, Icon, Open Custom Hotstrings &Folder, shell32.dll, 127
 	Menu, fMenu, Add, Open &Settings File, MenuAction
 	Menu, fMenu, Icon, Open &Settings File, shell32.dll, 70
 	Menu, fMenu, Add
 	Menu, fMenu, Add, E&xit, MenuAction
-	Menu, fMenu, Icon, E&xit, shell32.dll, 131
+	Menu, fMenu, Icon, E&xit, shell32.dll, 132
 	
 	;OPTIONS MENU
 	Menu, optsMenu, Add, Remember &Window Position, MenuAction
 	Menu, optsMenu, Add
+	Menu, optsMenu, Add, GUI &Color, MenuAction
+	Menu, optsMenu, Icon,  GUI &Color, imageres.dll, 110
 	Menu, optsMenu, % settings.ea("//Options").RememberPosition ? "Check" : "UnCheck", Remember &Window Position
 	
 	;HELP MENU
@@ -854,16 +902,7 @@ GuiClose() {
 	GuiEscape:
 	ButtonQuit:
 	ButtonClose:
-	if (_Changed)
-		if (m("You've changed your hotstrings!`n", "Save Changes??", "btn:yn", "ico:!") = "Yes")
-			Gosub, ButtonSave
-	pos := settings.ssn("//Guis/Gui[@ID='" A_Gui "']/Position")
-	WinGetPos, wx, wy, ww, wh
-	for c, v in {x:wx, y:wy, w:ww, h:wh}
-		pos.setAttribute(c, v), posStr.=" " c v
-	pos.text := Trim(posStr)
-	settings.save(1)
-	Exitapp
+	Shutdown()
 }
 GuiContextMenu() {
 	if (A_GuiControl != "LV_1")
@@ -898,7 +937,20 @@ GuiSize() {
 	Anchor(CloseButton, "yx.5", 1)
 	return
 }
-
+m(info*) {
+	static icons:={"x":16,"?":32,"!":48,"i":64}, btns:={c:1,oc:1,co:1,ari:2,iar:2,ria:2,rai:2,ync:3,nyc:3,cyn:3,cny:3,yn:4,ny:4,rc:5,cr:5}
+	for c, v in info {
+		if RegExMatch(v, "imS)^(?:btn:(?P<btn>c|\w{2,3})|(?:ico:)?(?P<ico>x|\?|\!|i)|title:(?P<title>.+)|def:(?P<def>\d+)|time:(?P<time>\d+(?:\.\d{1,2})?|\.\d{1,2}))$", m_) {
+			mBtns:=m_btn?1:mBtns, title:=m_title?m_title:title, timeout:=m_time?m_time:timeout
+			opt += m_btn?btns[m_btn]:m_ico?icons[m_ico]:m_def?(m_def-1)*256:0
+		} else
+			txt .= (txt ? "`n":"") v
+	}
+	MsgBox, % (opt+262144), %title%, %txt%, %timeout%
+	for c, v in ["OK", "YES", "NO", "CANCEL", "RETRY", "ABORT"]
+		IfMsgBox, %v%
+			return (mBtns ? v : "")
+}
 MainList:
 {
 	if (A_GuiEvent = "DoubleClick")
@@ -928,6 +980,16 @@ MenuAction() {
 		run, % "*edit " settings.file
 		ExitApp
 	}
+	else if (mi = "GUI Color") {
+		gui, +OwnDialogs
+		InputBox, clr, Change GUI Color, Enter GUI Background Color:,,,,,,,, % (curColor:=settings.ssn("//Style/Color/@Background")).text
+		if (ErrorLevel || clr="" || clr=curColor.text)
+			return
+		curColor.text := clr
+		Shutdown(1)
+	}
+	else
+		m("Not yet implemented", "ico:i")
 }
 Read_File:
 {
@@ -1036,4 +1098,20 @@ TriggerChange() {
 	if (InStr(_Strings, ED_1))
 		ControlSend, SysListView321, {Blind}{Home}%ED_1%
 	return
+}
+Shutdown(reload:="") {
+	if (_Changed)
+		if (m("You've changed your hotstrings!`n", "Save Changes??", "btn:yn", "ico:!") = "Yes")
+			Gosub, ButtonSave
+	pos := settings.ssn("//Guis/Gui[@ID='" A_Gui "']/Position")
+	WinGetPos, wx, wy, ww, wh
+	for c, v in {x:wx, y:wy, w:ww, h:wh}
+		pos.setAttribute(c, v), posStr.=" " c v
+	pos.text := Trim(posStr)
+	settings.save(1)
+	if (reload){
+		Reload
+		Pause
+	}
+	Exitapp
 }
