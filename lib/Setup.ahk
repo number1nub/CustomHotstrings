@@ -18,7 +18,6 @@ Setup(dir:="") {
 		guiOpts := settings.under(gui, "Options")
 		settings.under(guiOpts, "Option",, "Resize")
 		settings.under(guiOpts, "Option",, "ToolWindow")
-		settings.under(guiOpts, "Option",, "AlwaysOnTop")
 		settings.under(guiOpts, "Option",, "MinSize690x510")
 		hsopts := settings.add2("HSOptions")
 		settings.under(hsopts, "Option",, "?0: Don't trigger within words")
@@ -29,6 +28,11 @@ Setup(dir:="") {
 		settings.under(hsopts, "Option",, "R0: Send expressions (raw off)")
 		settings.save(1)
 	}
+	
+	;Catch Major Config File Changes Here
+	if (tmp:=settings.ssn("//Gui/Options/Option[text()='AlwaysOnTop']"))
+		tmp.parentNode.removeChild(tmp)
+	
 	
 	RegRead, edPath, HKCU, %regPath%, EditorPath
 	if (ErrorLevel || (A_IsCompiled && edPath != A_ScriptFullPath))
