@@ -1,16 +1,18 @@
 FileMenu(gui:="") {
 	;FILE MENU
 	Menu, fMenu, Add, Open Custom Hotstrings &Folder, MenuAction
-	Menu, fMenu, Icon, Open Custom Hotstrings &Folder, shell32.dll, 46
+	Menu, fMenu, Icon, Open Custom Hotstrings &Folder, shell32.dll, 127
 	Menu, fMenu, Add, Open &Settings File, MenuAction
 	Menu, fMenu, Icon, Open &Settings File, shell32.dll, 70
 	Menu, fMenu, Add
 	Menu, fMenu, Add, E&xit, MenuAction
-	Menu, fMenu, Icon, E&xit, shell32.dll, 131
+	Menu, fMenu, Icon, E&xit, shell32.dll, 132
 	
 	;OPTIONS MENU
 	Menu, optsMenu, Add, Remember &Window Position, MenuAction
 	Menu, optsMenu, Add
+	Menu, optsMenu, Add, GUI &Color, MenuAction
+	Menu, optsMenu, Icon,  GUI &Color, imageres.dll, 110
 	Menu, optsMenu, % settings.ea("//Options").RememberPosition ? "Check" : "UnCheck", Remember &Window Position
 	
 	;HELP MENU

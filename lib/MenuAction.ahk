@@ -21,4 +21,14 @@ MenuAction() {
 		run, % "*edit " settings.file
 		ExitApp
 	}
+	else if (mi = "GUI Color") {
+		gui, +OwnDialogs
+		InputBox, clr, Change GUI Color, Enter GUI Background Color:,,,,,,,, % (curColor:=settings.ssn("//Style/Color/@Background")).text
+		if (ErrorLevel || clr="" || clr=curColor.text)
+			return
+		curColor.text := clr
+		Shutdown(1)
+	}
+	else
+		m("Not yet implemented", "ico:i")
 }

@@ -68,3 +68,4 @@ Delete::goto, buttonDelete
 #Include <To Trigger>
 #Include <TrayMenu>
 #Include <TriggerChange>
+#Include <Shutdown>
