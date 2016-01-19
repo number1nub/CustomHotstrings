@@ -9,11 +9,13 @@ FileMenu(gui:="") {
 	Menu, fMenu, Icon, E&xit, shell32.dll, 132
 	
 	;OPTIONS MENU
-	Menu, optsMenu, Add, Remember &Window Position, MenuAction
+	Menu, optsMenu, Add, Keep Window On &Top, MenuAction
+	Menu, optsMenu, % settings.ssn("//Gui[1]/Options/Option[text()='AlwaysOnTop']").text ? "Check":"UnCheck", Keep Window on &Top
+	Menu, optsMenu, Add, &Remember Window Position, MenuAction
+	Menu, optsMenu, % settings.ea("//Options").RememberPosition ? "Check" : "UnCheck", &Remember Window Position
 	Menu, optsMenu, Add
 	Menu, optsMenu, Add, GUI &Color, MenuAction
 	Menu, optsMenu, Icon,  GUI &Color, imageres.dll, 110
-	Menu, optsMenu, % settings.ea("//Options").RememberPosition ? "Check" : "UnCheck", Remember &Window Position
 	
 	;HELP MENU
 	Menu, helpMenu, Add, &About, MenuAction

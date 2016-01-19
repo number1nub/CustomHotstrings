@@ -29,6 +29,20 @@ MenuAction() {
 		curColor.text := clr
 		Shutdown(1)
 	}
+	else if ("Keep Window on Top") {
+		optsPath := "//Gui[@ID='1']/Options"
+		if (aot:=settings.ssn(optsPath "/Option[text()='AlwaysOnTop']")) {
+			Gui, 1:-AlwaysOnTop
+			settings.Remove(aot)
+		}
+		else {
+			settings.under(settings.ssn(optsPath), "Option",, "AlwaysOnTop")
+			Gui, 1:+AlwaysOnTop
+		}
+		Menu, optsMenu, ToggleCheck, %A_ThisMenuItem%
+		Menu, Tray, ToggleCheck, %A_ThisMenuItem%
+		settings.Save(1)
+	}
 	else
 		m("Not yet implemented", "ico:i")
 }

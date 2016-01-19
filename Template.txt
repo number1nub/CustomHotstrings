@@ -2,96 +2,138 @@
 #SingleInstance, Force
 SetWorkingDir, %A_ScriptDir%
 SetTitleMatchMode, 3
-regPath := "Software\WSNHapps\CustomHotstrings"
-try {
-	RegRead, hkEnabled, HKCU, %regPath%, hkEnabled
-	RegRead, hkKeys, HKCU, %regPath%, hkKeys
-} catch {
-	hkEnabled:=1, hkKeys:="^+1"
-	RegWrite, REG_DWORD, HKCU, %regPath%, hkEnabled, %hkEnabled%
-	RegWrite, REG_SZ, HKCU, %regPath%, hkKeys, %hkKeys%
+global regPath:="Software\WSNHapps\CustomHotstrings", hkKeys, hkEnabled
+CheckAdmin()
+GetHKConfig()
+TrayMenu()
+Hotkey, %hkKeys%, HSEditor, % hkEnabled ? "On" : "Off"
+#Hotstring, * C1 R B ?
+return
+CheckAdmin() {
+	if (!A_IsAdmin) {
+		if (%true% = "admin") {
+			MsgBox, 262196,, Failed to get admin credentials.`n`nTry again?
+			IfMsgBox, No
+				ExitApp
+		}
+		Run, *RunAs "%A_ScriptFullPath%" admin
+		ExitApp
+	}
+	return 1
 }
-RegRead, editorPath, HKCU, %regPath%, EditorPath
-if (ErrorLevel || !editorPath)
-	editorPath:=FileExist("Custom Hotstrings.exe")?"Custom Hotstrings.exe":FileExist("Custom Hotstrings.ahk")?"Custom Hotstrings.ahk":""
-#If (hkEnabled)
-hotkey, %hkKeys%, HSEditor
-#If
-Menu, Tray, NoStandard
-Menu, Tray, Add, % "Launch Hotstring Editor " hkToString(hkKeys), HSEditor
-Menu, Tray, default, % "Launch Hotstring Editor " hkToString(hkKeys)
-Menu, Tray, Add, Hotkey Enabled, hkToggle
-Menu, Tray, % (hkEnabled ? "check" : "uncheck"), Hotkey Enabled
-Menu, Tray, Add, Customize the hotkey, hkChange
-Menu, Tray, Add,
-Menu, Tray, Add, Check for Update, Update
-Menu, Tray, Add,
-Menu, Tray, Add, Reload
-Menu, Tray, Add, Exit
-Menu, Tray, Tip, My Custom Hotstrings`n`nrunning...
-if (!FileExist("hotstrings.ico"))
-	URLDownloadToFile, http://files.wsnhapps.com/hotstrings/hotstrings.ico, hotstrings.ico
-Menu, Tray, Icon, % FileExist(mIco:="hotstrings.ico") ? mIco : ""
-TrayTip, Custom Hotstrings, Reloaded!, 800, 1
-return
-HSEditor:
-if (editorPath){
-	SplitPath, editorPath,, editorDir
-	Run, % editorPath, % editorDir
-} else
-	MsgBox 4144,, Couldn't find Custom Hotstrings editor...
-return
-Update:
-if (FileExist("update.exe"))
-	Run, update.exe
-else
-	MsgBox 4144,, Unable to find updater file.`n`nTry visiting http://wsnhapps.com to re-download the application.
-return
-hkToggle:
-hkEnabled := !hkEnabled
-Menu, Tray, ToggleCheck, Hotkey Enabled
-RegWrite, REG_DWORD, HKCU,Software\WSNHapps\CustomHotstrings, hkEnabled, % hkEnabled ? 1 : 0
-return
-hkChange:
-Gui, +AlwaysOnTop +OwnDialogs
-InputBox, newHK, Hotkey Customization,Enter the hotkey to open the HS editor.`n`nUse ^`, !`, + and # for Ctrl`, Alt`, Shift and Win`, respectively,,,,,,,,%hkKeys%
-if (ErrorLevel || !newHK || newHK=hkKeys)
-	return
-RegWrite, REG_SZ, HKCU, Software\WSNHapps\CustomHotstrings, hkKeys, %newHK%
-Reload
-return
-ttoff:
-settimer, ttoff, off
-ToolTip
-TrayTip
-return
-Exit:
-ExitApp
-Reload:
-Reload
-hkToString(str)	{
-	StringReplace, v, str, +, Shift+
-	StringReplace, v, v, ^, Ctrl+
-	StringReplace, v, v, !, Alt+	
-	StringReplace, v, v, #, Win+
-	return "(" v ")"
-}
-PasteVal(sendTxt) {
-	WinGetClass, wClass, A
-	CBBU:=Clipboard, Clipboard:=""
-	Clipboard:=ExpandEnv(sendTxt)
-	SendInput, % wClass="ConsoleWindowClass" ? "!{Space}ep" : "^v"
-	sleep 200
-	Clipboard := CBBU
+Exit() {
+	ExitApp
 }
 ExpandEnv(str) {
 	VarSetCapacity(dest, 2000)
 	DllCall("ExpandEnvironmentStrings", "str", str, "str", dest, int, 1999, "Cdecl int")
 	Return dest
 }
-#Hotstring, * C1 R B ?
-;****************************************************************************************************
+Export() {
+	RegRead, buDir, HKCU, %regPath%, BUDir
+	FileSelectFile, oPath, 16, % (buDir!="" ? RegExReplace(buDir,"\\$") : "C:\Users\rameen25365\Desktop") "\" TimeStamp() "_hsTxt.ahk", Where should the output file be saved?, Hostring Backup (*.ahk, *.bak)
+	if (ErrorLevel || oPath="")
+		return
+	try FileCopy, A_ScriptFullPath, oPath, 1
+		catch e
+			return m("An error occurred while backing up your hostrings.`n", "", e.message, e.extra, "ico:!")
+	SplitPath, oPath,, oDir
+	RegWrite, REG_SZ, HKCU, %regPath%, BUDir, %oDir%
+	m("Sucessfully backed up hotstrings to", oPath,"ico:i")
+}
+GetEditorPath() {
+	RegRead, ePath, HKCU, %regPath%, EditorPath
+	if (ErrorLevel || !ePath || !FileExist(ePath))
+		ePath := FileExist(ep:="Custom Hotstrings.exe") ? ep : FileExist(ep:="Custom Hotstrings.ahk") ? ep : ""
+	return (FileExist(ePath) ? ePath : "")
+}
+GetHKConfig(get:="") {
+	try {
+		RegRead, hkEnabled, HKCU, %regPath%, hkEnabled
+		RegRead, hkKeys, HKCU, %regPath%, hkKeys
+	} catch e {
+		RegWrite, REG_DWORD, HKCU, %regPath%, hkEnabled, % (hkEnabled:=1)
+		RegWrite, REG_SZ, HKCU, %regPath%, hkKeys, % (hkKeys:="^!MButton")
+	}
+}
+HKChange() {
+	Gui, +AlwaysOnTop +OwnDialogs
+	InputBox, newHK, Hotkey Customization, Enter the hotkey to open the HS editor.`n`nUse ^`, !`, + and # for Ctrl`, Alt`, Shift and Win`, respectively,,,,,,,, %hkKeys%
+	if (ErrorLevel || newHK="" || newHK=hkKeys)
+		return
+	RegWrite, REG_SZ, %regPath%, hkKeys, %newHK%
+	Reload()
+}
+HKToggle() {
+	Hotkey, %hkKeys%, HSEditor, % (hkEnabled:=!hkEnabled) ? "On":"Off"
+	Menu, Tray, ToggleCheck, Disable Hotkey
+	RegWrite, REG_DWORD, HKCU,Software\WSNHapps\CustomHotstrings, hkEnabled, % hkEnabled ? 1 : 0
+}
+HKToString(key) {
+	for a, b in [{Shift:"+"}, {Ctrl:"^"}, {Alt:"!"}]
+		for c, d in b
+			key := RegExReplace(key, "\" d, c "+")
+	return LTrim(key, "~$*")
+}
+HSEditor() {
+	try Run, % GetEditorPath()
+		catch
+			MsgBox 4144,, % "Couldn't find Custom Hotstrings editor...`n`n" GetEditorPath()
+}
+PasteVal(sendTxt, win:="") {
+	cbb:=Clipboard, Clipboard:=""
+	Clipboard := ExpandEnv(RegExReplace(sendTxt, "i)\$(?:CLIP|SEL(?:ECTION)?)", cbb))
+	if (win)
+		WinActivate, %win%
+	Send, % "{Blind}" (WinActive("ahk_class ConsoleWindowClass") ? "!{Space}ep" : "^v")
+	Sleep 250
+	Clipboard := cbb
+}
+Reload() {
+	Reload
+	Pause
+}
+TimeStamp(format:="yyyy-MM-dd", time:="") {
+	FormatTime, v, % time ? time : A_Now, %format%
+	return v
+}
+TrayMenu() {
+	Menu, DefaultAHK, Standard
+	Menu, Tray, NoStandard
+	Menu, Tray, Add, % "Launch Hotstring Editor" (hkKeys ? "`t(" HKToString(hkKeys) ")" : ""), HSEditor
+	Menu, Tray, Default, % "Launch Hotstring Editor" (hkKeys ? "`t(" HKToString(hkKeys) ")" : "")
+	Menu, Tray, Add, Disable Hotkey, HKToggle
+	Menu, Tray, % (hkEnabled ? "Uncheck" : "Check"), Disable Hotkey
+	Menu, Tray, Add, Customize the hotkey, hkChange
+	Menu, Tray, Add
+	Menu, Tray, Add, Backup/Export Hotstrings, Export
+	Menu, Tray, Add
+	Menu, Tray, Add, Check for Update, Update
+	if (!A_IsCompiled) {
+		Menu, Tray, Add
+		Menu, Tray, Add, Default AHK Menu, :DefaultAHK
+	}
+	Menu, Tray, Add
+	Menu, Tray, Add, Reload
+	Menu, Tray, Add, Exit
+	Menu, Tray, Tip, % "Custom Hotstrings " (A_IsAdmin ? " (Admin)":"") " is Running..."
+	if (!FileExist(ico:=A_ScriptDir "\hotstrings.ico")) {
+		URLDownloadToFile, http://files.wsnhapps.com/hotstrings/hotstrings.ico, %ico%
+		if (ErrorLevel || !FileExist(ico))
+			FileDelete, %ico%
+	}
+	Menu, Tray, Icon, % FileExist(ico) ? ico : ""
+	TrayTip, Custom Hotstrings, Reloaded!, 800, 1
+}
+Update() {
+	if (ePath:=GetEditorPath())
+		Run, "%ePath%" /update
+	else
+		MsgBox 4144,, % "Unable to find updater file.`n`n" ePath "`n`nTry visiting http://wsnhapps.com to re-download the application."
+}
+
 ;______________________________________ BEGIN USER HOTSTRINGS _______________________________________
+;****************************************************************************************************
 
 :?0C:btw::by the way
 ::lol::laugh out loud

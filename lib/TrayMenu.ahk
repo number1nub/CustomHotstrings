@@ -2,8 +2,10 @@ TrayMenu() {
 	Menu, DefaultAHK, Standard
 	Menu, Tray, NoStandard
 	
-	Menu, Tray, Add, Remember &Window Position, MenuAction
-	Menu, Tray, % settings.ea("//Options").RememberPosition ? "Check":"UnCheck", Remember &Window Position
+	Menu, Tray, Add, Keep Window On &Top, MenuAction
+	Menu, Tray, % settings.ssn("//Gui[1]/Options/Option[text()='AlwaysOnTop']").text ? "Check":"UnCheck", Keep Window on &Top
+	Menu, Tray, Add, &Remember Window Position, MenuAction
+	Menu, Tray, % settings.ea("//Options").RememberPosition ? "Check":"UnCheck", &Remember Window Position
 	Menu, Tray, Add, Open Custom Hotstrings Folder, MenuAction
 	Menu, Tray, Add, Open Settings File, MenuAction
 	if (!A_IsCompiled) {

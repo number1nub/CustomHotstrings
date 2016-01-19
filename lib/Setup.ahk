@@ -30,10 +30,9 @@ Setup(dir:="") {
 	}
 	
 	;Catch Major Config File Changes Here
-	if (tmp:=settings.ssn("//Gui/Options/Option[text()='AlwaysOnTop']"))
+	if (tmp:=settings.ssn("//Gui/Options/Option[text()='ToolWindow']"))
 		tmp.parentNode.removeChild(tmp)
-	
-	
+		
 	RegRead, edPath, HKCU, %regPath%, EditorPath
 	if (ErrorLevel || (A_IsCompiled && edPath != A_ScriptFullPath))
 		RegWrite, REG_SZ, HKCU, %regPath%, EditorPath, %A_ScriptFullPath%
