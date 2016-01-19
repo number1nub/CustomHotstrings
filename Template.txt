@@ -31,15 +31,17 @@ ExpandEnv(str) {
 }
 Export() {
 	RegRead, buDir, HKCU, %regPath%, BUDir
-	FileSelectFile, oPath, 16, % (buDir!="" ? RegExReplace(buDir,"\\$") : "C:\Users\rameen25365\Desktop") "\" TimeStamp() "_hsTxt.ahk", Where should the output file be saved?, Hostring Backup (*.ahk, *.bak)
+	FileSelectFile, oPath, 16, % (buDir!="" ? RegExReplace(buDir,"\\$") : A_Desktop) "\" TimeStamp() "_hsTxt.ahk", Where should the output file be saved?, Hostring Backup (*.ahk, *.bak)
 	if (ErrorLevel || oPath="")
 		return
 	try FileCopy, A_ScriptFullPath, oPath, 1
-		catch e
-			return m("An error occurred while backing up your hostrings.`n", "", e.message, e.extra, "ico:!")
+		catch e {
+			MsgBox 4144,, % "An error occurred while backing up your hostrings.`n`n" e.message "`n`n" e.extra
+			return
+		}
 	SplitPath, oPath,, oDir
 	RegWrite, REG_SZ, HKCU, %regPath%, BUDir, %oDir%
-	m("Sucessfully backed up hotstrings to", oPath,"ico:i")
+	MsgBox 4148,, Sucessfully backed up hotstrings to`n%oPath%
 }
 GetEditorPath() {
 	RegRead, ePath, HKCU, %regPath%, EditorPath
