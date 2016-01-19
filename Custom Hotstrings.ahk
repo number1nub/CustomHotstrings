@@ -38,52 +38,53 @@ AddOption() {
 	ControlSend, Edit2, {Blind}^{End}
 	return
 }
-Anchor(i, a:="", r:=false) {
-	static c,cs:=12,cx:=255,cl:=0,g,gs:=8,gl:=0,gpi,gw,gh,z:=0,k:=0xffff,ptr
-	if z = 0
-		VarSetCapacity(g,gs*99,0),VarSetCapacity(c,cs*cx,0),ptr:=A_PtrSize?"Ptr":"UInt",z:=true
-	if !WinExist("ahk_id" . i) {
-		GuiControlGet t, Hwnd, %i%
-		if ErrorLevel = 0
-			i := t
-		else ControlGet i, Hwnd,, %i%
+Anchor(ctrl,anchor="",redraw=false) {
+	Static Ptr,PtrSize,GetParent,GetWindowInfo,SetWindowPos,RedrawWindow,c,cs,cl=0,g,gs,gl=0,gi,gpi,gw,gh
+	if (!Ptr)
+		Ptr:=A_PtrSize?"Ptr":"UInt",PtrSize:=A_PtrSize?A_PtrSize:4,AStr:=A_IsUnicode?"AStr":"Str",Module:=DllCall("GetModuleHandle","Str","user32",Ptr),GetParent:=DllCall("GetProcAddress",Ptr,Module,AStr,"GetParent",Ptr),GetWindowInfo:=DllCall("GetProcAddress",Ptr,Module,AStr,"GetWindowInfo",Ptr),SetWindowPos:=DllCall("GetProcAddress",Ptr,Module,AStr,"SetWindowPos",Ptr),RedrawWindow:=DllCall("GetProcAddress",Ptr,Module,AStr,"RedrawWindow",Ptr),cs:=PtrSize+8,gs:=PtrSize+4,VarSetCapacity(c,cs*255,0),VarSetCapacity(g,gs*99,0),VarSetCapacity(gi,60,0),NumPut(60,gi,0,"UInt")
+	if !WinExist("ahk_id " ctrl) {
+		GuiControlGet,t,Hwnd,%ctrl%
+		if (!ErrorLevel)
+			ctrl := t
+		else
+			ControlGet,ctrl,Hwnd,,%ctrl%
 	}
-	VarSetCapacity(gi, 68, 0), DllCall("GetWindowInfo", "UInt", gp := DllCall("GetParent", "UInt", i), ptr, &gi)
-		, giw := NumGet(gi, 28, "Int") - NumGet(gi, 20, "Int"), gih := NumGet(gi, 32, "Int") - NumGet(gi, 24, "Int")
+	DllCall(GetWindowInfo,Ptr,gp:=DllCall(GetParent,Ptr,ctrl,Ptr),Ptr,&gi,"Int"),giw:=NumGet(gi,28,"Int")-NumGet(gi,20,"Int"),gih:=NumGet(gi,32,"Int")-NumGet(gi,24,"Int")
 	if (gp != gpi) {
 		gpi := gp
-		loop %gl%
-			if NumGet(g, cb := gs*(A_Index - 1), "UInt") == gp {
-				gw := NumGet(g, cb+4, "Short"), gh := NumGet(g, cb+6, "Short"), gf := 1
+		Loop,%gl% {
+			if (NumGet(g,cb := gs * (A_Index - 1),Ptr) == gp) {
+				gw:=NumGet(g,cb+PtrSize,"Short"),gh:=NumGet(g,cb+PtrSize+2,"Short"),gf:=1
 				break
 			}
-		if !gf
-			NumPut(gp, g, gl, "UInt"), NumPut(gw := giw, g, gl+4, "Short"), NumPut(gh := gih, g, gl+6, "Short"), gl += gs
+		}
+		if (!gf)
+			NumPut(gp,g,gl,Ptr),NumPut(gw:=giw,g,gl+PtrSize,"Short"),NumPut(gh:=gih,g,gl+PtrSize+2,"Short"),gl += gs
 	}
-	ControlGetPos dx, dy, dw, dh,, ahk_id %i%
-	loop %cl%
-		if NumGet(c, cb := cs*(A_Index - 1), "UInt") == i {
-			if (a = "") {
-				cf := 1
+	ControlGetPos,dx,dy,dw,dh,,ahk_id %ctrl%
+	Loop,%cl% {
+		if (NumGet(c,cb := cs * (A_Index - 1),Ptr) == ctrl) {
+			if (anchor = "") {
+				cf = 1
 				break
 			}
-			giw-=gw, gih-=gh, as:=1, dx:=NumGet(c, cb+4, "Short"), dy:=NumGet(c, cb+6, "Short"), cw:=dw, dw:=NumGet(c, cb+8, "Short"), ch:=dh, dh:=NumGet(c, cb+10, "Short")
-			loop Parse, a, xywh
-				if A_Index > 1
-					av:=SubStr(a,as,1), as+=1+StrLen(A_LoopField), d%av%+=(InStr("yh",av)?gih:giw)*(A_LoopField+0?A_LoopField:1)
-			DllCall("SetWindowPos", "UInt", i, "UInt", 0, "Int", dx, "Int", dy, "Int", InStr(a, "w") ? dw : cw, "Int", InStr(a, "h") ? dh : ch, "Int", 4)
-			if r != 0
-				DllCall("RedrawWindow", "UInt", i, "UInt", 0, "UInt", 0, "UInt", 0x0101)
+			giw-=gw,gih-=gh,as:=1,dx:=NumGet(c,cb+PtrSize,"Short"),dy:=NumGet(c,cb+PtrSize+2,"Short"),cw:=dw,dw:=NumGet(c,cb+PtrSize+4,"Short"),ch:=dh,dh:=NumGet(c,cb+PtrSize+6,"Short")
+			Loop,Parse,anchor,xywh
+				if (A_Index > 1)
+					av:=SubStr(anchor,as,1),as+=1+StrLen(A_LoopField),d%av% += (InStr("yh",av) ? gih : giw) * (A_LoopField + 0 ? A_LoopField : 1)
+			DllCall(SetWindowPos,Ptr,ctrl,Ptr,0,"Int",dx,"Int",dy,"Int",InStr(anchor,"w") ? dw : cw,"Int",InStr(anchor,"h") ? dh : ch,"UInt",0x0004,"Int")
+			if (redraw)
+				DllCall(RedrawWindow,Ptr,ctrl,Ptr,0,Ptr,0,"UInt",0x0001 | 0x0100,"Int")
 			return
 		}
-	if cf != 1
-		cb := cl, cl += cs
-	bx := NumGet(gi, 48, "UInt"), by := NumGet(gi, 16, "Int") - NumGet(gi, 8, "Int") - gih - NumGet(gi, 52, "UInt")
+	}
+	if (cf != 1)
+		cb:=cl,cl+=cs
+	bx:=NumGet(gi,48,"UInt"),by:=NumGet(gi,16,"Int") - NumGet(gi,8,"Int") - gih - NumGet(gi,52,"UInt")
 	if cf = 1
-		dw -= giw - gw, dh -= gih - gh
-	NumPut(i, c, cb, "UInt"), NumPut(dx - bx, c, cb+4, "Short"), NumPut(dy - by, c, cb+6, "Short")
-		, NumPut(dw, c, cb+8, "Short"), NumPut(dh, c, cb+10, "Short")
-	return true
+		dw-=giw-gw,dh -= gih - gh
+	NumPut(ctrl,c,cb,Ptr),NumPut(dx-bx,c,cb+PtrSize,"Short"),NumPut(dy-by,c,cb+PtrSize+2,"Short"),NumPut(dw,c,cb+PtrSize+4,"Short"),NumPut(dh,c,cb + PtrSize + 6,"Short")
+	return,True
 }
 Args(paramList) {
 	count:=0, options:={}	
@@ -930,13 +931,14 @@ m(info*) {
 		if RegExMatch(v, "imS)^(?:btn:(?P<btn>c|\w{2,3})|(?:ico:)?(?P<ico>x|\?|\!|i)|title:(?P<title>.+)|def:(?P<def>\d+)|time:(?P<time>\d+(?:\.\d{1,2})?|\.\d{1,2}))$", m_) {
 			mBtns:=m_btn?1:mBtns, title:=m_title?m_title:title, timeout:=m_time?m_time:timeout
 			opt += m_btn?btns[m_btn]:m_ico?icons[m_ico]:m_def?(m_def-1)*256:0
-		} else
+		}
+		else
 			txt .= (txt ? "`n":"") v
 	}
 	MsgBox, % (opt+262144), %title%, %txt%, %timeout%
-	for c, v in ["OK", "YES", "NO", "CANCEL", "RETRY", "ABORT"]
+	for c, v in ["OK", "YES", "NO", "RETRY", "ABORT", "IGNORE"]
 		IfMsgBox, %v%
-			return (mBtns ? v : "")
+			return (mbtns ? v : "")
 }
 MainList:
 {
