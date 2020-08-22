@@ -23,7 +23,7 @@ tab::  SendInput, {Blind}<TAB>
 bs::   DeletePrevious()
 
 #if ControlActive("SysListView321", _Title)
-Delete::goto, buttonDelete
+Delete::goto, buttonDelete 
 #if
 ;}<<= HOTKEYS =====
 
@@ -602,7 +602,7 @@ class xml
 		return this.xml.SelectNodes(node)
 	}
 	
-	Get(path, default) {
+	Get(path, default:="") {
 		return value := this.ssn(path).text!="" ? this.ssn(path).text : default
 	}
 	
@@ -811,6 +811,8 @@ FileMenu(gui:="") {
 	Menu, optsMenu, Add
 	Menu, optsMenu, Add, GUI &Color, MenuAction
 	Menu, optsMenu, Icon,  GUI &Color, imageres.dll, 110
+	Menu, optsMenu, Add, Font &Color, MenuAction
+	Menu, optsMenu, Icon,  Font &Color, imageres.dll, 110
 	
 	;HELP MENU
 	Menu, helpMenu, Add, &About, MenuAction
@@ -1053,8 +1055,14 @@ MenuAction() {
 		clr := ColorPicker(curColor, _Hwnd)
 		if (ErrorLevel || !clr)
 			return
-		;~ settings.ssn("//Style/Color/@Background").text := StrReplace(clr, "0x")
-		;~ settings.save(1)
+		cfgColor.text := StrReplace(clr, "0x")
+		Shutdown(1)
+	}
+	else if (mi = "Font Color") {
+		curColor := "0x" (cfgColor:=settings.ssn("//Font/@Color")).text
+		clr := ColorPicker(curColor, _Hwnd)
+		if (ErrorLevel || !clr)
+			return
 		cfgColor.text := StrReplace(clr, "0x")
 		Shutdown(1)
 	}

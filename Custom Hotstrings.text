@@ -1,4 +1,6 @@
 1.9.2.5
+Custom Hotstrings v1.9.2.5
 - Fixed bug with settings file. Will now properly reset user's settings.xml even if it exists but is empty (from previous bug)
+- Added Color GUI for selecting font color
 1
 
