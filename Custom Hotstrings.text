@@ -1,44 +1,4 @@
-1.9.2.3
-- Updated template for first time run
-1.9.2.2
-- Added option to enable/disable AlwaysOnTop to GUI menu & Tray menu
-1.9.2.1
-- Disabled GUI AlwaysOnTop to allow system dialogs to display correctly
-1.9.2.0
-- Added a menu bar to the GUI allowing quick access to settings & other features
-- Added option to change GUI color from menu
-1.9.1.3
-- Fixed Typo in first time run causing issues
-1.9.1.2
-- Modified anchoring to allow better viewing of replacement text
-- Changed template file to download from Github instead of FileInstall
-1.9.1.1
-- Re-orginized file structure
-- Added option to open settings.xml file from tray menu
-- Code formatting and cleanup
-1.9.0.2
-- Fixed bug when typing in GUI with CapsLock on. Send all keys to GUI blind
-1.9.0.1
-- Changed to no longer require removing "Version=" from ;auto_version
-1.9.0.0
-- Update test
-1.8.8.9
-- Added settings XML to store GUI options & for saving position
-- Changed updater to look at Custom Hotstrings.text version log instead of version.ini for updates
-- Added "Remember Position" option. Accessible through tray menu
-1.8.8.8
-- Fixed URL in updater
-1.8.8.7
-- Modified initial GUI size to allow fitting on smaller screens
-- Changed updater system to use CheckUpdate
-- Added command line interface to allow checking for updates
-1.8.8.6
-- Added update check on startup
-1.8.8.5
-- Compiling for release
-1.8.8.4
-- implementing auto_version
-1.8.8.3
-- Initial load
-- Working template install on first run
-- Moved hsTxt to user's AppData folder
+1.9.2.5
+- Fixed bug with settings file. Will now properly reset user's settings.xml even if it exists but is empty (from previous bug)
+1
+

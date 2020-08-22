@@ -4,13 +4,13 @@ DetectHiddenWindows, on
 SetTitleMatchMode, 2
 SetWorkingDir, %A_ScriptDir%
 
-global settings, _HS_File, _File, _Strings, _Search, _Match, _Changed, _Title, multi, version
+global settings, _HS_File, _File, _Strings, _Search, _Match, _Changed, _Title, _Hwnd, multi, version
 
 CmdLine(%true%)
 Setup()
 TrayMenu()
 CheckUpdate()
-Gui()
+_Hwnd := Gui()
 return
 
 
@@ -38,6 +38,7 @@ AddOption() {
 	ControlSend, Edit2, {Blind}^{End}
 	return
 }
+
 Anchor(ctrl,anchor="",redraw=false) {
 	Static Ptr,PtrSize,GetParent,GetWindowInfo,SetWindowPos,RedrawWindow,c,cs,cl=0,g,gs,gl=0,gi,gpi,gw,gh
 	if (!Ptr)
@@ -86,6 +87,7 @@ Anchor(ctrl,anchor="",redraw=false) {
 	NumPut(ctrl,c,cb,Ptr),NumPut(dx-bx,c,cb+PtrSize,"Short"),NumPut(dy-by,c,cb+PtrSize+2,"Short"),NumPut(dw,c,cb+PtrSize+4,"Short"),NumPut(dh,c,cb + PtrSize + 6,"Short")
 	return,True
 }
+
 Args(paramList) {
 	count:=0, options:={}	
 	paramList := RegExReplace(paramList, "(?:([^\s])-|(\s+)-(\s+))", "$1$2<dash>$3")
@@ -101,6 +103,7 @@ Args(paramList) {
 	ErrorLevel:=count
 	return options
 }
+
 ButtonAdd() {
 	GuiControlGet, ED_1
 	GuiControlGet, ED_2
@@ -115,6 +118,7 @@ ButtonAdd() {
 	GuiControl, -Disabled, saveButton
 	ButtonClear()
 }
+
 ButtonClear() {
 	GuiControl, Enable, BT_Add
 	GuiControl, Disable, BT_Repl
@@ -124,6 +128,7 @@ ButtonClear() {
 	GuiControl,, ED_3
 	ControlFocus, Edit1
 }
+
 ButtonDelete:
 {
 	_Row := LV_GetNext()
@@ -160,6 +165,7 @@ ButtonDelete:
 	}
 	return
 }
+
 ButtonEdit:
 {
 	_Row := LV_GetNext()
@@ -195,10 +201,12 @@ ButtonEdit:
 	_Changed := False
 	return
 }
+
 ButtonEditAHKFile() {
 	Run, *edit "%_HS_File%"
 	ExitApp
 }
+
 ButtonFind() {
 	GuiControlGet, ED_3
 	if (!RegExMatch(ED_3, "[^\s]+"))
@@ -210,6 +218,7 @@ ButtonFind() {
 		LV_Modify(_MATCH, "Select Focus Vis")
 	return
 }
+
 ButtonReplace:
 {
 	Gui, Submit, NoHide
@@ -224,6 +233,7 @@ ButtonReplace:
 	ButtonClear()
 	return
 }
+
 ButtonSave:
 {
 	Gui, +OwnDialogs
@@ -249,10 +259,12 @@ ButtonSave:
 		run, %_HS_File%
 	return
 }
+
 ChangedSomething() {
 	GuiControlGet, ED_3
 	GuiControl, % "Enable" (ED_3?1:0), BT_Find
 }
+
 CheckAutoHotkey() {
 	RegRead, ahkPath, HKLM, Software\AutoHotkey, InstallDir
 	if (ErrorLevel || !FileExist(ahkPath)) {
@@ -265,20 +277,22 @@ CheckAutoHotkey() {
 		}
 	}
 }
+
 CheckUpdate(_ReplaceCurrentScript:=1, _SuppressMsgBox:=0, _CallbackFunction:="", ByRef _Information:="") {
 	Static Update_URL   := "http://files.wsnhapps.com/hotstrings/Custom%20Hotstrings.text"
-		 , Download_URL := "http://files.wsnhapps.com/hotstrings/Custom%20Hotstrings.exe" 
+		 , Download_URL := "http://files.wsnhapps.com/hotstrings/Custom%20Hotstrings.exe"
 		 , Retry_Count  := 2
 		 , Script_Name
-	
-	version:="1.9.2.3"
+		 , Version := ;auto_update
+
+
 	if (!Version)
 		return
 	if (!Script_Name) {
 		SplitPath, A_ScriptFullPath,,,, scrName
 		Script_Name := scrName
 	}
-	Random, Filler, 10000000, 99999999	
+	Random, Filler, 10000000, 99999999
 	Version_File := A_Temp "\" Filler ".ini", Temp_FileName:=A_Temp "\" Filler ".tmp", VBS_FileName:=A_Temp "\" Filler ".vbs"
 	Loop, %Retry_Count% {
 		_Information := ""
@@ -302,7 +316,7 @@ CheckUpdate(_ReplaceCurrentScript:=1, _SuppressMsgBox:=0, _CallbackFunction:="",
 					MsgBox_Result := 1
 			if (_SuppressMsgBox || MsgBox_Result) {
 				URL := Download_URL
-				SplitPath, URL,,, Extension					
+				SplitPath, URL,,, Extension
 				if (Extension = "ahk" && A_AHKPath = "")
 					_Information .= "The new version of the script is an .ahk filetype and you do not have AutoHotKey installed on this computer.`r`nReplacing the current script is not supported."
 				else if (Extension != "exe" && Extension != "ahk")
@@ -335,7 +349,7 @@ CheckUpdate(_ReplaceCurrentScript:=1, _SuppressMsgBox:=0, _CallbackFunction:="",
 										Success := True
 								}
 								else
-									DllCall("CloseHandle",Ptr,H), Success := True									
+									DllCall("CloseHandle",Ptr,H), Success := True
 							}
 						}
 						else {
@@ -353,7 +367,7 @@ CheckUpdate(_ReplaceCurrentScript:=1, _SuppressMsgBox:=0, _CallbackFunction:="",
 			_Information .= "No update was found."
 		FileDelete, %Version_File%
 		Break
-	}	
+	}
 	if (_ReplaceCurrentScript && Success) {
 		SplitPath, URL,,, Extension
 		Process, Exist
@@ -444,177 +458,63 @@ CheckUpdate(_ReplaceCurrentScript:=1, _SuppressMsgBox:=0, _CallbackFunction:="",
 	_Information := _Information ? _Information : "None"
 	Return Return_Val
 }
-class Xml
+
+class xml
 {
+	keep:=[]
+	
 	__New(param*) {
-		root:=param.1, file:=param.2?param.2:root ".xml"
-		temp:=ComObjCreate("MSXML2.DOMDocument"), temp.setProperty("SelectionLanguage","XPath")
+		root:=param.1, file:=param.2
+		file:=file ? file : root ".xml"
+		temp:=ComObjCreate("MSXML2.DOMDocument")
+		temp.setProperty("SelectionLanguage", "XPath")
 		this.xml:=temp, this.fileExists:=false
-		if (FileExist(file)) {
+		if FileExist(file) {
 			FileRead, info, %file%
 			if (!info) {
-				this.xml := this.create(temp, root)
+				this.xml := this.CreateElement(temp, root)
 				FileDelete, %file%
 			}
 			else
 				this.fileExists:=true, temp.loadxml(info), this.xml:=temp
 		}
 		else
-			this.xml := this.create(temp, root)
+			this.xml := this.CreateElement(temp, root)
 		this.file := file
+		xml.keep[root] := this
 	}
 	
-	__Get(x:="") {
+	__Get(x="") {
 		return this.xml.xml
 	}
 	
-	Add(path, att:="", text:="", dup:=0, list:="") {
-		p:="/",dup1:=this.ssn("//" path)?1:0,next:=this.ssn("//" path),last:=SubStr(path,InStr(path,"/",0,0)+1)
-		if (!next.xml) {
-			next := this.ssn("//*")
-			Loop, Parse, path, /
-				last:=A_LoopField, p.="/" last, next:=this.ssn(p)?this.ssn(p):next.appendchild(this.xml.createElement(last))
-		}
-		if (dup && dup1)
-			next := next.parentnode.appendchild(this.xml.createElement(last))
-		for a, b in att
-			next.SetAttribute(a, b)
-		for a, b in StrSplit(list, ",")
-			next.SetAttribute(b, att[b])
-		if (text)
-			next.text := text
-		return next
+	CreateElement(doc, root) {
+		return doc.AppendChild(this.xml.CreateElement(root)).parentnode
 	}
 	
-	Create(doc, root) {
-		return doc.AppendChild(this.xml.createElement(root)).parentnode
+	search(node, find, return="") {
+		found:=this.xml.SelectNodes(node "[contains(.,'" RegExReplace(find,"&","')][contains(.,'") "')]")
+		while,ff:=found.item[A_Index-1]
+			if (ff.text = find) {
+				if (return)
+					return ff.SelectSingleNode("../" return)
+				return ff.SelectSingleNode("..")
+			}
 	}
 	
-	EA(path) {
-		list:=[]
-		if (nodes:=path.nodename)
-			nodes := path.SelectNodes("@*")
-		else if (path.text)
-			nodes := this.sn("//*[text()='" path.text "']/@*")
-		else if (!IsObject(path))
-			nodes := this.sn(path "/@*")
-		else
-			for a, b in path
-				nodes := this.sn("//*[@" a "='" b "']/@*")
-		while, (n:=nodes.item(A_Index-1))
-			list[n.nodename] := n.text
-		return list
+	lang(info) {
+		info:= info="" ? "XPath" : "XSLPattern"
+		this.xml.temp.setProperty("SelectionLanguage", info)
 	}
 	
-	FF(info*) {
-		doc := info.1.NodeName ? info.1 : this.xml
-		if (info.1.NodeName)
-			node:=info.2, find:=info.3
-		else
-			node:=info.1, find:=info.2
-		if (InStr(find, "'"))
-			return doc.selectSingleNode(node "[.=concat('" RegExReplace(find,"'","'," Chr(34) "'" Chr(34) ",'") "')]/..")
-		else
-			return doc.selectSingleNode(node "[.='" find "']/..")
-	}
-	
-	Find(info) {
-		if (info.att.1 && info.text) {
-			MsgBox 4144,, You can only search by either the attribute or the text, not both
+	unique(info) {
+		if (info.check&&info.text)
 			return
-		}
-		search := info.path ? "//" info.path : "//*"
-		for a, b in info.att
-			search .= "[@" a "='" b "']"
-		if (info.text)
-			search .= "[text()='" info.text "']"
-		return this.ssn(search)
-	}
-	
-	Get(path, default:="") {
-		return ((ptxt:=this.ssn(path).text) ? ptxt : default)
-	}
-	
-	Lang(info) {
-		info:=!info?"XPath":"XSLPattern", this.xml.temp.setProperty("SelectionLanguage", info)
-	}
-	
-	Remove(rem) {
-		if (!IsObject(rem))
-			rem := this.ssn(rem)
-		rem.parentNode.removeChild(rem)
-	}
-	
-	Save(x*) {
-		if (x.1=1)
-			this.Transform()
-		filename := this.file ? this.file : x.1.1
-		SplitPath, filename,, fDir
-		if (!FileExist(fDir))
-			FileCreateDir, %fDir%
-		file:=fileopen(filename, "rw", "Utf-8"), file.seek(0), file.write(this[]), file.length(file.position)
-	}
-	
-	Search(node, find) {
-		while, ff:=found.Item[A_Index-1]
-			if (ff.text = find)
-				return ff
-	}
-	
-	SN(node) {
-		return this.xml.SelectNodes(node)
-	}
-	
-	SSN(node) {
-		return this.xml.SelectSingleNode(node)
-	}
-	
-	Transform() {
-		static
-		if (!IsObject(xsl)) {
-			xsl := ComObjCreate("MSXML2.DOMDocument")
-			style=
-			(
-			<xsl:stylesheet version="1.0" xmlns:xsl="http://www.w3.org/1999/XSL/Transform">
-			<xsl:output method="xml" indent="yes" encoding="UTF-8"/>
-			<xsl:template match="@*|node()">
-				<xsl:copy>
-					<xsl:apply-templates select="@*|node()"/>
-					<xsl:for-each select="@*">
-						<xsl:text>
-						</xsl:text>
-					</xsl:for-each>
-				</xsl:copy>
-			</xsl:template>
-			</xsl:stylesheet>
-			)
-			xsl.loadXML(style), style:=null
-		}
-		this.xml.transformNodeToObject(xsl, this.xml)
-	}
-	
-	Under(under, node:="", att:="", text:="", list:="") {
-		if (!node) {
-			node:=under.node, att:=under.att, list:=under.list, under:=under.under
-		}
-		new := under.appendchild(this.xml.createElement(node))
-		for a, b in att
-			new.SetAttribute(a, b)
-		for a, b in StrSplit(list, ",")
-			new.SetAttribute(b, att[b])
-		if (text)
-			new.text := text
-		return new
-	}
-	
-	Unique(info) {
-		if (info.check && info.text)
-			return
-		if (info.under) {
+		if info.under{
 			if (info.check)
-				find := info.under.selectSingleNode("*[@" info.check "='" info.att[info.check] "']")
+				find := info.under.SelectSingleNode("*[@" info.check "='" info.att[info.check] "']")
 			if (info.Text)
-				find := this.ssn(info.under,"*[text()='" info.text "']")
+				find := this.cssn(info.under,"*[text()='" info.text "']")
 			if (!find)
 				find := this.under(info.under,info.path,info.att)
 			for a, b in info.att
@@ -634,7 +534,125 @@ class Xml
 			find.text := info.text
 		return find
 	}
+	
+	add2(path, att:="", text:="", dup:=0, list:="") {
+		p:="/", dup1:=this.ssn("//" path)?1:0, next:=this.ssn("//" path), last:=SubStr(path,InStr(path,"/",0,0)+1)
+		if (!next.xml) {
+			next := this.ssn("//*")
+			Loop, Parse, path, /
+				last:=A_LoopField, p.="/" last, next:=this.ssn(p)?this.ssn(p):next.appendchild(this.xml.CreateElement(last))
+		}
+		if (dup&&dup1)
+			next := next.parentnode.appendchild(this.xml.CreateElement(last))
+		for a, b in att
+			next.SetAttribute(a, b)
+		for a, b in StrSplit(list, ",")
+			next.SetAttribute(b, att[b])
+		if (text)
+			next.text := text
+		return next
+	}
+	
+	add(info) {
+		path:=info.path, p:="/", dup:=this.ssn("//" path)?1:0
+		if (next:=this.ssn("//" path) ? this.ssn("//" path) : this.ssn("//*"))
+			Loop, Parse, path, /
+				last:=A_LoopField, p.="/" last, next:=this.ssn(p)?this.ssn(p):next.appendchild(this.xml.CreateElement(last))
+		if (info.dup && dup)
+			next := next.parentnode.appendchild(this.xml.CreateElement(last))
+		for a, b in info.att
+			next.SetAttribute(a, b)
+		for a, b in StrSplit(info.list, ",")
+			next.SetAttribute(b, info.att[b])
+		if (info.text)
+			next.text := info.text
+		return next
+	}
+	
+	find(info) {
+		if (info.att.1 && info.text)
+			return m("You can only search by either the attribut or the text, not both","ico:!")
+		search := info.path ? "//" info.path : "//*"
+		for a, b in info.att
+			search .= "[@" a "='" b "']"
+		if (info.text)
+			search .= "[text()='" info.text "']"
+		current := this.ssn(search)
+		return current
+	}
+	
+	under(under, node:="", att:="", text:="", list:="") {
+		if (!node)
+			node:=under.node, att:=under.att, list:=under.list, under:=under.under
+		new := under.appendchild(this.xml.createelement(node))
+		for a, b in att
+			new.SetAttribute(a, b)
+		for a, b in StrSplit(list, ",")
+			new.SetAttribute(b, att[b])
+		if (text)
+			new.text := text
+		return new
+	}
+	
+	ssn(node) {
+		return this.xml.SelectSingleNode(node)
+	}
+	
+	sn(node) {
+		return this.xml.SelectNodes(node)
+	}
+	
+	Get(path, default) {
+		return value := this.ssn(path).text!="" ? this.ssn(path).text : default
+	}
+	
+	Transform(Loop:=1){
+		static
+		if(!IsObject(XSL)) {
+			XSL:=ComObjCreate("MSXML2.DOMDocument")
+			XSL.LoadXML("<xsl:stylesheet version=""1.0"" xmlns:xsl=""http://www.w3.org/1999/XSL/Transform""><xsl:output method=""xml"" indent=""yes"" encoding=""UTF-8""/><xsl:template match=""@*|node()""><xsl:copy>`n<xsl:apply-templates select=""@*|node()""/><xsl:for-each select=""@*""><xsl:text></xsl:text></xsl:for-each></xsl:copy>`n</xsl:template>`n</xsl:stylesheet>")
+			Style:=null
+		}
+		Loop,%Loop%
+			this.XML.TransformNodeToObject(XSL,this.XML)
+	}
+	
+	save(x*) {
+		if (x.1=1)
+			this.Transform()
+		filename := this.file ? this.file : x.1.1
+		SplitPath, filename,, fDir
+		if (!FileExist(fDir))
+			FileCreateDir, %fDir%
+		file := fileopen(filename, "rw", "Utf-8")
+		file.seek(0)
+		file.write(this[])
+		file.length(file.position)
+	}
+	
+	remove(rem) {
+		if (!IsObject(rem))
+			rem := this.ssn(rem)
+		rem.ParentNode.RemoveChild(rem)
+	}
+	
+	ea(path) {
+		list:=[]
+		if (nodes:=path.nodename)
+			nodes := path.SelectNodes("@*")
+		else if (path.text)
+			nodes := this.sn("//*[text()='" path.text "']/@*")
+		else if (!IsObject(path))
+			nodes := this.sn(path "/@*")
+		else
+			for a, b in path
+				nodes := this.sn("//*[@" a "='" b "']/@*")
+		while, (n:=nodes.item[A_Index-1])
+			list[n.nodename] := n.text
+		return list
+	}
 }
+
 CMBox(msg, btns, opts:="") {
 	iconVal:={"x":16,"?":32,"!":48,"i":64}, btnVal:={2:4, 3:2}, defVal:=[256, 512], btns:=IsObject(btns)?btns:StrSplit(btns, "|")
 	opt := 262144+iconVal[opts.ico]+btnVal[btns.MaxIndex()]+(opts.def>1&&opts.def<4 ? defVal[opts.def-1] : 0)
@@ -676,6 +694,7 @@ CMBox(msg, btns, opts:="") {
 	ControlSetText, Button3, % btns[3]	
 	return
 }
+
 CmdLine(info*) {
 	Loop, %info%
 		plist .= (plist ? " " : "") %A_Index%
@@ -686,11 +705,57 @@ CmdLine(info*) {
 		ExitApp
 	}
 }
+
+ColorPicker(defClr:=0, parentWinHWND:=0, ByRef custColorObj:="", hideCust:=false) {
+	hideCust := hideCust ? 0x1 : 0x3
+	c1       := Format("0x{:02X}", (defClr&255)<<16)
+	c2       := Format("0x{:02X}", defClr&65280)
+	c3       := Format("0x{:02X}", defClr>>16)
+	defClr   := Format("0x{:06X}", c1|c2|c3)
+	size     := VarSetCapacity(CHOOSECOLOR, 9 * A_PtrSize,0)
+	VarSetCapacity(CUSTOM, 16 * A_PtrSize,0)
+	If (IsObject(custColorObj)) {
+		Loop 16 
+			If (custColorObj.HasKey(A_Index)) {
+				col     := custColorObj[A_Index]
+				c4      := Format("0x{:02X}",(col&255)<<16)
+				c5      := Format("0x{:02X}",col&65280)
+				c6      := Format("0x{:02X}",col>>16)
+				custCol := Format("0x{:06X}",c4|c5|c6)
+				NumPut(custCol, CUSTOM, (A_Index-1) * 4, "UInt")
+			}
+	}
+	NumPut(size, CHOOSECOLOR, 0, "UInt")
+	NumPut(parentWinHWND, CHOOSECOLOR, A_PtrSize, "UPtr")
+	NumPut(defClr, CHOOSECOLOR, 3 * A_PtrSize, "UInt")
+	NumPut(hideCust, CHOOSECOLOR, 5 * A_PtrSize, "UInt")
+	NumPut(&CUSTOM, CHOOSECOLOR, 4 * A_PtrSize, "UPtr")
+	if (!(ret:=DllCall("comdlg32\ChooseColor", "UPtr", &CHOOSECOLOR, "UInt")))
+		Exit
+	custColorObj := Array()
+	Loop 16 {
+		newClr := NumGet(custom, (A_Index-1) * 4, "UInt")
+		c7     := Format("0x{:02X}", (newClr&255)<<16)
+		c8     := Format("0x{:02X}", newClr&65280)
+		c9     := Format("0x{:02X}", newClr>>16)
+		newClr := Format("0x{:06X}", c7|c8|c9)
+		custColorObj.InsertAt(A_Index, newClr)
+	}
+	defClr      := NumGet(CHOOSECOLOR, 3 * A_PtrSize, "UInt")
+	c1          := Format("0x{:02X}",(defClr&255)<<16)
+	c2          := Format("0x{:02X}",defClr&65280)
+	c3          := Format("0x{:02X}",defClr>>16)
+	defClr      := Format("0x{:06X}",c1|c2|c3)
+	CUSTOM:="", CHOOSECOLOR:=""
+	return defClr
+}
+
 ControlActive(Control_Name, winTitle) {
 	ControlGetFocus, Active_Control, %winTitle%
 	if (Active_Control = Control_Name)
 		return 1
 }
+
 CreateNewHSTxt() {
 	static url:="https://raw.githubusercontent.com/number1nub/CustomHotstrings/master/Template.txt"
 	
@@ -714,6 +779,7 @@ CreateNewHSTxt() {
 		ExitApp
 	}
 }
+
 DeletePrevious() {
 	cbBU:=Clipboard, Clipboard:=""
 	SendInput, {Blind}+{Home}
@@ -726,6 +792,7 @@ DeletePrevious() {
 	Clipboard := RegExMatch(Clipboard,"i)(.*?)(\<\w+\>)$",v) ? v1 : SubStr(Clipboard,1,-1)
 	SendInput, {Blind}^v
 }
+
 FileMenu(gui:="") {
 	;FILE MENU
 	Menu, fMenu, Add, Open Custom Hotstrings &Folder, MenuAction
@@ -758,6 +825,7 @@ FileMenu(gui:="") {
 		Gui, %gui%:Default
 	Gui, Menu, MenuBar
 }
+
 Find_Next(str, lastRow, searchCol=3) {
 	Global
 	Local Options:="", Text:="", End:=LV_GetCount(), Row:=lastRow+1
@@ -777,6 +845,7 @@ Find_Next(str, lastRow, searchCol=3) {
 			return m("No (more) matches for", str, "ico:i")
 	}
 }
+
 From_Raw(String) {
 	StringReplace, String, String, ``r, `r`n, All
 	StringReplace, String, String, ``t, %A_Tab%, All
@@ -785,6 +854,7 @@ From_Raw(String) {
 	StringReplace, String, String, ````, ``, All
 	return String
 }
+
 From_Trigger(String) {
 	StringReplace, String, String,``n, <ENTER>, All
 	StringReplace, String, String, %A_Space%, <SPACE>, All
@@ -792,6 +862,7 @@ From_Trigger(String) {
 	StringReplace, String, String, %a_tab%, <TAB>, All
 	return String
 }
+
 Gui() {
 	global
 	vColor  := settings.ea("//Style/Color")
@@ -879,19 +950,23 @@ Gui() {
 	
 	
 	;{=== SHOW GUI ===>>
-	Gui, Show,, % settings.ea(vGui).Name
+	Gui, Show,, % (gTitle:=settings.ea(vGui).Name)
 	if (settings.ea("//Options").RememberPosition) {
 		pos := settings.ea(ssn(vGui, "//Position"))
 		WinMove, % settings.ea(vGui).Name,, % pos.x, % pos.y, % pos.w, % pos.h
 	}
 	;}
+	
+	return (WinExist(gTitle))
 }
+
 GuiClose() {
 	GuiEscape:
 	ButtonQuit:
 	ButtonClose:
 	Shutdown()
 }
+
 GuiContextMenu() {
 	if (A_GuiControl != "LV_1")
 		return
@@ -900,6 +975,7 @@ GuiContextMenu() {
 	Menu, rClick, Show
 	Menu, rClick, DeleteAll
 }
+
 GuiSize() {
 	global
 	Anchor(GB_EditHS, "wh", 1)
@@ -925,6 +1001,7 @@ GuiSize() {
 	Anchor(CloseButton, "yx.5", 1)
 	return
 }
+
 m(info*) {
 	static icons:={"x":16,"?":32,"!":48,"i":64}, btns:={c:1,oc:1,co:1,ari:2,iar:2,ria:2,rai:2,ync:3,nyc:3,cyn:3,cny:3,yn:4,ny:4,rc:5,cr:5}
 	for c, v in info {
@@ -940,12 +1017,14 @@ m(info*) {
 		IfMsgBox, %v%
 			return (mbtns ? v : "")
 }
+
 MainList:
 {
 	if (A_GuiEvent = "DoubleClick")
 		goto, ButtonEdit
 	return
 }
+
 MenuAction() {
 	mi := StrReplace(A_ThisMenuItem, "&")
 	
@@ -970,11 +1049,13 @@ MenuAction() {
 		ExitApp
 	}
 	else if (mi = "GUI Color") {
-		gui, +OwnDialogs
-		InputBox, clr, Change GUI Color, Enter GUI Background Color:,,,,,,,, % (curColor:=settings.ssn("//Style/Color/@Background")).text
-		if (ErrorLevel || clr="" || clr=curColor.text)
+		curColor := "0x" (cfgColor:=settings.ssn("//Style/Color/@Background")).text
+		clr := ColorPicker(curColor, _Hwnd)
+		if (ErrorLevel || !clr)
 			return
-		curColor.text := clr
+		;~ settings.ssn("//Style/Color/@Background").text := StrReplace(clr, "0x")
+		;~ settings.save(1)
+		cfgColor.text := StrReplace(clr, "0x")
 		Shutdown(1)
 	}
 	else if ("Keep Window on Top") {
@@ -994,6 +1075,7 @@ MenuAction() {
 	else
 		m("Not yet implemented", "ico:i")
 }
+
 Read_File:
 {
 	LV_Delete()
@@ -1010,6 +1092,7 @@ Read_File:
 	LV_ModifyCol(1, "AutoHdr")
 	return
 }
+
 Setup(dir:="") {	
 	_HSDir   := dir ? dir : A_AppData "\WSNHapps\Custom Hotstrings"
 	_HS_File := _HSDir "\hsTxt.ahk"
@@ -1018,10 +1101,10 @@ Setup(dir:="") {
 	_Title   := "Custom Hotstring Manager"
 	settings := new Xml("settings", _HSDir "\settings.xml")
 	
-	if (!settings.fileExists) {
+	if (!settings.fileExists || !settings.sn("//HSOptions/Option").item[0].text) {
 		settings.add2("Options", {RememberPosition:0},"")
 		style := settings.add2("Style")
-		settings.under(style, "Color", {Background:"8A4444", Control:"White"})
+		settings.under(style, "Color", {Background:"0x8A4444", Control:"0xFFFFFF"})
 		settings.under(style, "Font", {Font:"Segoe UI", Color:"White", Size:11})
 		guis := settings.add2("Guis")
 		gui := settings.under(guis, "Gui", {ID:1, Name:"Custom Hotstring Manager"})
@@ -1044,7 +1127,7 @@ Setup(dir:="") {
 	;Catch Major Config File Changes Here
 	if (tmp:=settings.ssn("//Gui/Options/Option[text()='ToolWindow']"))
 		tmp.parentNode.removeChild(tmp)
-		
+	
 	RegRead, edPath, HKCU, %regPath%, EditorPath
 	if (ErrorLevel || (A_IsCompiled && edPath != A_ScriptFullPath))
 		RegWrite, REG_SZ, HKCU, %regPath%, EditorPath, %A_ScriptFullPath%
@@ -1052,16 +1135,37 @@ Setup(dir:="") {
 	if (!FileExist(_HS_File))
 		CreateNewHSTxt()
 }
+
+Shutdown(reload:="") {
+	if (_Changed)
+		if (m("You've changed your hotstrings!`n", "Save Changes??", "btn:yn", "ico:!") = "Yes")
+			Gosub, ButtonSave
+	pos := settings.ssn("//Guis/Gui[@ID='" A_Gui "']/Position")
+	WinGetPos, wx, wy, ww, wh
+	for c, v in {x:wx, y:wy, w:ww, h:wh}
+		pos.setAttribute(c, v), posStr.=" " c v
+	pos.text := Trim(posStr)
+	settings.save(1)
+	if (reload){
+		Reload
+		Pause
+	}
+	Exitapp
+}
+
 sn(node, path) {
 	return node.selectNodes(path)
 }
+
 ssn(node, path) {
 	return node.selectSingleNode(path)
 }
+
 StatusChange(status := "") {	
 	global _Changed := status ? !_Changed : status
 	GuiControl, % (_Changed ? "+" : "-") "Disabled", ButtonSave
 }
+
 To_Raw(String) {
 	StringReplace, String, String, ``, ````, All
 	StringReplace, String, String, `r`n, ``r, All
@@ -1071,12 +1175,14 @@ To_Raw(String) {
 	StringReplace, String, String, `:, ```:, All
 	return String
 }
+
 To_Trigger(String) {
 	StringReplace, String, String, <ENTER>, ``n, All
 	StringReplace, String, String, <TAB>, ``t, All
 	StringReplace, String, String, <SPACE>, %A_Space%, All
 	return String
 }
+
 TrayMenu() {
 	Menu, DefaultAHK, Standard
 	Menu, Tray, NoStandard
@@ -1099,6 +1205,7 @@ TrayMenu() {
 	else
 		Menu, Tray, Icon, % FileExist(mIco := (A_ScriptDir "\hotstrings.ico")) ? mIco : ""
 }
+
 TriggerChange() {
 	GuiControlGet, ED_1
 	if (!RegExMatch(ED_1, "[^\s]+"))
@@ -1106,20 +1213,4 @@ TriggerChange() {
 	if (InStr(_Strings, ED_1))
 		ControlSend, SysListView321, {Blind}{Home}%ED_1%
 	return
-}
-Shutdown(reload:="") {
-	if (_Changed)
-		if (m("You've changed your hotstrings!`n", "Save Changes??", "btn:yn", "ico:!") = "Yes")
-			Gosub, ButtonSave
-	pos := settings.ssn("//Guis/Gui[@ID='" A_Gui "']/Position")
-	WinGetPos, wx, wy, ww, wh
-	for c, v in {x:wx, y:wy, w:ww, h:wh}
-		pos.setAttribute(c, v), posStr.=" " c v
-	pos.text := Trim(posStr)
-	settings.save(1)
-	if (reload){
-		Reload
-		Pause
-	}
-	Exitapp
 }
